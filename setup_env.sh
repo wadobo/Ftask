@@ -9,7 +9,7 @@ fi
 
 $venv env
 source ./env/bin/activate
-pip install -r dependencies.txt
+pip install -r requirements.txt
 
 echo "env created ok"
 echo ""
