@@ -17,14 +17,44 @@
 from __future__ import division, absolute_import
 
 from flask import Flask
+from flask import jsonify, json
+from flask import request
+from pymongo import MongoClient
 
 
+# configuration
+DEBUG = True
+DATABASE = 'ftask'
+SECRET_KEY = 'development key'
+
+# create our little application :)
 app = Flask(__name__)
+app.config.from_object(__name__)
 
 
-@app.route("/")
-def hello():
-    return "Hello World!"
+def get_db():
+    return MongoClient()[DATABASE]
+
+
+@app.route("/users/")
+def users():
+    users = get_db().users.find()
+    meta = {}
+    meta['total'] = users.count()
+    objs = [{'username': i['username']} for i in users]
+
+    return jsonify(meta=meta,
+                   objects=objs)
+
+
+@app.route("/users/register/", methods=['POST'])
+def users_register():
+    c = get_db().users
+    username = request.form.get('username')
+    u = {'username': username}
+    c.insert(u)
+
+    return jsonify(status="success")
 
 
 if __name__ == "__main__":
