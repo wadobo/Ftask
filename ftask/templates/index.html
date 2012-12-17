@@ -1,0 +1,40 @@
+<html>
+
+    <head>
+        <title>Ftask</title>
+    </head>
+
+    <body>
+
+
+        <script src="http://underscorejs.org/underscore.js"></script>
+        <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+        <script src="http://backbonejs.org/backbone.js"></script>
+
+        <script>
+            var User = Backbone.Model.extend({
+                defaults: {
+                    username: '',
+                    email: 'user@example.org'
+                }
+            });
+
+            var Users = Backbone.Collection.extend({
+                model: User,
+                parse: function(response) {
+                    var models = new Array();
+                    for (var i=0; i<response.meta.total; i++) {
+                        models.push(new User(response.objects[i]));
+                    }
+                    return models;
+                },
+                url: '/api/users/'
+            });
+
+            var ux = new Users();
+            ux.fetch();
+        </script>
+
+    </body>
+
+</html>

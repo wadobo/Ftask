@@ -20,6 +20,7 @@ from flask import Flask
 from flask import abort
 from flask import jsonify, json
 from flask import request
+from flask import render_template
 from pymongo import MongoClient
 
 from hashlib import sha256
@@ -49,7 +50,14 @@ def to_json(mongo_obj, excludes=[]):
     return copy
 
 
-@app.route('/users/')
+# VIEWS
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# API
+
+@app.route('/api/users/')
 def users():
     users = get_db().users.find()
     meta = {}
@@ -60,7 +68,7 @@ def users():
                    objects=objs)
 
 
-@app.route('/users/register/', methods=['POST'])
+@app.route('/api/users/register/', methods=['POST'])
 def users_register():
     c = get_db().users
     username = request.form['username']
