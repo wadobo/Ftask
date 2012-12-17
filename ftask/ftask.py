@@ -17,9 +17,12 @@
 from __future__ import division, absolute_import
 
 from flask import Flask
+from flask import abort
 from flask import jsonify, json
 from flask import request
 from pymongo import MongoClient
+
+from hashlib import sha256
 
 
 # configuration
@@ -30,28 +33,47 @@ SECRET_KEY = 'development key'
 # create our little application :)
 app = Flask(__name__)
 app.config.from_object(__name__)
+app.config.from_envvar('FTASK_SETTINGS', silent=True)
 
 
 def get_db():
-    return MongoClient()[DATABASE]
+    return MongoClient()[app.config['DATABASE']]
 
 
-@app.route("/users/")
+def to_json(mongo_obj, excludes=[]):
+    copy = mongo_obj.copy()
+    id = copy.pop('_id')
+    copy['id'] = id.binary.encode("hex")
+    for k in excludes:
+        del copy[k]
+    return copy
+
+
+@app.route('/users/')
 def users():
     users = get_db().users.find()
     meta = {}
     meta['total'] = users.count()
-    objs = [{'username': i['username']} for i in users]
+    objs = [to_json(i) for i in users]
 
     return jsonify(meta=meta,
                    objects=objs)
 
 
-@app.route("/users/register/", methods=['POST'])
+@app.route('/users/register/', methods=['POST'])
 def users_register():
     c = get_db().users
-    username = request.form.get('username')
-    u = {'username': username}
+    username = request.form['username']
+    pw = sha256(request.form['password']).hexdigest()
+    email = request.form['email']
+
+    u = {'username': username,
+         'password': pw,
+         'email': email}
+
+    if get_db().users.find({"username": username}).count():
+        raise abort(400)
+
     c.insert(u)
 
     return jsonify(status="success")
