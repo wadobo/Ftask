@@ -19,13 +19,13 @@ class FtaskTestCase(unittest.TestCase):
 
     def test_users_register(self):
         data = { 'username': 'danigm' }
-        res = self.app.post('/users/register/', data=data)
+        res = self.app.post('/api/users/register/', data=data)
         self.assertEqual(res.status_code, 400)
 
         data = { 'username': 'danigm',
                  'password': '123',
                  'email': 'danigm@wadobo.com'}
-        res = self.app.post('/users/register/', data=data)
+        res = self.app.post('/api/users/register/', data=data)
         self.assertEqual(res.status_code, 200)
 
 if __name__ == '__main__':
