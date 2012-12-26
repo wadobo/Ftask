@@ -20,12 +20,22 @@ from flask import Blueprint
 from flask import abort
 from flask import jsonify
 from flask import request
+from flask import session
+from flask import g
 from ..db import get_db, to_json
+from .apikey import new_user_apikey
 
 from hashlib import sha256
 
 
 auth = Blueprint('auth', __name__, template_folder='templates')
+
+
+@auth.before_request
+def before_request():
+    g.user = None
+    if 'user_id' in session:
+        g.user = get_db().users.find_one({'username': session['user_id']})
 
 
 @auth.route('/')
@@ -50,9 +60,31 @@ def register():
          'password': pw,
          'email': email}
 
-    if get_db().users.find({"username": username}).count():
+    if c.find({"username": username}).count():
         raise abort(400)
 
     c.insert(u)
 
     return jsonify(status="success")
+
+
+@auth.route('/login/', methods=['POST'])
+def login():
+    db = get_db()
+    c = db.users
+    username = request.form['username']
+    pw = sha256(request.form['password']).hexdigest()
+
+    if c.find({"username": username}).count() == 0:
+        raise abort(400)
+
+    u = c.find_one({"username": username})
+    if u['password'] != pw:
+        raise abort(400)
+
+    session['user_id'] = username
+    apikey = new_user_apikey(u)
+
+    resp = jsonify(status="success")
+    resp.headers['Authorization'] = apikey['key']
+    return resp
