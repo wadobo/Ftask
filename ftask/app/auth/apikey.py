@@ -31,13 +31,11 @@ def generate_apikey():
 
 def remove_old_apikeys(username):
     db = get_db()
-    apikey_collection = db.apikeys
+    c = db.apikeys
 
-    keys = apikey_collection.find_one({'user': username})
+    keys = c.find_one({'user': username})
     if not keys:
         return
-
-    c = get_db().apikey_collection
 
     newks = []
     for k in keys['keys']:
@@ -57,16 +55,40 @@ def new_user_apikey(u):
     remove_old_apikeys(u['username'])
 
     db = get_db()
-    apikey_collection = db.apikeys
+    c = db.apikeys
 
-    keys = apikey_collection.find_one({'user': u['username']})
+    keys = c.find_one({'user': u['username']})
 
     apikey = generate_apikey()
     if not keys:
         newapi = {'user': u['username'], 'keys': [apikey]}
-        apikey_collection.insert(newapi)
+        c.insert(newapi)
     else:
         keys['keys'].append(apikey)
-        apikey_collection.save(keys)
+        c.save(keys)
 
     return apikey
+
+
+def user_by_apikey(apikey):
+    db = get_db()
+    c = db.apikeys
+
+    keys = c.find_one({'keys.key': apikey})
+    if not keys:
+        return None
+
+    for k in keys['keys']:
+        if k['key'] == apikey and valid_apikey(k):
+            # updating apikey
+            k['updated'] = datetime.datetime.now()
+            c.save(keys)
+
+            return db.users.find_one({'username': keys['user']})
+
+    return None
+
+
+def delete_apikey(apikey):
+    # TODO doit :P
+    pass

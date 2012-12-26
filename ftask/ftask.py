@@ -18,7 +18,7 @@ from __future__ import division, absolute_import
 
 from flask import Flask
 from flask import render_template
-from app.auth.views import auth
+from app.auth.views import auth, auth_before_request
 
 
 # configuration
@@ -30,6 +30,12 @@ SECRET_KEY = 'development key'
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.from_envvar('FTASK_SETTINGS', silent=True)
+
+
+@app.before_request
+def before_request():
+    auth_before_request()
+
 
 # blueprints
 app.register_blueprint(auth, url_prefix='/api/users')

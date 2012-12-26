@@ -63,8 +63,8 @@ class UserTestCase(BaseTestCase):
         data = {'username': 'danigm', 'password': '123'}
         res = self.post('/login/', data=data, status=200, tojson=True)
         assert 'Authorization' in res.headers
+        apikey = res.headers['Authorization']
 
-        # All ok
-        data = {'username': 'danigm', 'password': '123'}
-        res = self.post('/login/', data=data, status=200, tojson=True)
-        assert 'Authorization' in res.headers
+        headers = [('apikey', apikey)]
+        res = self.get('/profile/', status=200, tojson=True, headers=headers)
+        print res.json

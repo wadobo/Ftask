@@ -23,7 +23,7 @@ from flask import request
 from flask import session
 from flask import g
 from ..db import get_db, to_json
-from .apikey import new_user_apikey
+from .apikey import new_user_apikey, user_by_apikey, delete_apikey
 
 from hashlib import sha256
 
@@ -31,11 +31,15 @@ from hashlib import sha256
 auth = Blueprint('auth', __name__, template_folder='templates')
 
 
-@auth.before_request
-def before_request():
+def auth_before_request():
     g.user = None
+    g.apikey = None
     if 'user_id' in session:
         g.user = get_db().users.find_one({'username': session['user_id']})
+
+    if 'apikey' in request.headers:
+        g.user = user_by_apikey(request.headers['apikey'])
+        g.apikey = request.headers['apikey']
 
 
 @auth.route('/')
@@ -43,7 +47,7 @@ def list_users():
     users = get_db().users.find()
     meta = {}
     meta['total'] = users.count()
-    objs = [to_json(i) for i in users]
+    objs = [to_json(i, excludes=['password']) for i in users]
 
     return jsonify(meta=meta,
                    objects=objs)
@@ -88,3 +92,19 @@ def login():
     resp = jsonify(status="success")
     resp.headers['Authorization'] = apikey['key']
     return resp
+
+
+@auth.route('/logout/', methods=['POST'])
+def logout():
+    if g.user:
+        del session['user_id']
+        g.user = None
+    if g.apikey:
+        delete_apikey(g.apikey)
+
+
+@auth.route('/profile/', methods=['GET', 'POST'])
+def profile():
+    if not g.user:
+        raise abort(401)
+    return jsonify(to_json(g.user, excludes=['password']))
