@@ -16,30 +16,19 @@
 
 from __future__ import division, absolute_import
 
-from flask import Flask
-from flask import render_template
-from app.auth.views import auth
+from flask import current_app as app
+
+from pymongo import MongoClient
 
 
-# configuration
-DEBUG = True
-DATABASE = 'ftask'
-SECRET_KEY = 'development key'
-
-# create our little application :)
-app = Flask(__name__)
-app.config.from_object(__name__)
-app.config.from_envvar('FTASK_SETTINGS', silent=True)
-
-# blueprints
-app.register_blueprint(auth, url_prefix='/api/users')
+def get_db():
+    return MongoClient()[app.config['DATABASE']]
 
 
-# basic views
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-
-if __name__ == "__main__":
-    app.run()
+def to_json(mongo_obj, excludes=[]):
+    copy = mongo_obj.copy()
+    id = copy.pop('_id')
+    copy['id'] = id.binary.encode("hex")
+    for k in excludes:
+        del copy[k]
+    return copy
