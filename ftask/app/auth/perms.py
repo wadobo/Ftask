@@ -56,3 +56,9 @@ def test_perm(perm_type, user, objid):
             'obj': objid
            }
     return bool(c.find_one(perm))
+
+
+def get_perms(objid):
+    c = get_db().perms
+    perm = {'obj': objid}
+    return c.find(perm)
