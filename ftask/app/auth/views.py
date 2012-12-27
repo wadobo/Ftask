@@ -24,6 +24,7 @@ from flask import session
 from flask import g
 from ..db import get_db, to_json
 from .apikey import new_user_apikey, user_by_apikey, delete_apikey
+from .decorators import authenticated
 
 from hashlib import sha256
 
@@ -107,7 +108,6 @@ def logout():
 
 
 @auth.route('/profile/', methods=['GET', 'POST'])
+@authenticated
 def profile():
-    if not g.user:
-        raise abort(401)
     return jsonify(to_json(g.user, excludes=['password']))
