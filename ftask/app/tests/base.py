@@ -12,40 +12,60 @@ from pymongo import MongoClient
 
 class BaseTestCase(unittest.TestCase):
 
+    def add_test_users(self):
+        users = [
+            {'username': 'danigm',
+             'password': '123',
+             'email': 'danigm@wadobo.com'},
+        ]
+        users += [{'username': 'user%d' % i,
+                   'password': '123',
+                   'email': 'user%d@wadobo.com' %i}\
+                   for i in range(10)]
+        for u in users:
+            # registering using register view...
+            self.app.post('/api/users/register/', data=u)
+
+
+    def login(self, username, password):
+        data = {'username': username, 'password': password}
+        res = self.app.post('/api/users/login/', data=data)
+        self.apikey = res.headers['Authorization']
+
+    def logout(self):
+        headers = [('apikey', self.apikey)]
+        self.app.post('/api/users/logout/', headers=headers)
+        self.apikey = None
+
     def setUp(self):
         ftask.app.config['DATABASE'] = 'ftask_test'
         ftask.app.config['TESTING'] = True
         self.app = ftask.app.test_client()
 
+        self.apikey = None
+        self.add_test_users()
+
     def tearDown(self):
         MongoClient().drop_database('ftask_test')
 
-    def get(self, path, status=200, tojson=False, **kwargs):
-        res = self.app.get(self.PATH + path, **kwargs)
-        self.assertEqual(res.status_code, status)
-        if tojson:
-            res.json = json.loads(res.data)
+    def get(self, *args, **kwargs):
+        return self.query(self.app.get, *args, **kwargs)
 
-        return res
+    def post(self, *args, **kwargs):
+        return self.query(self.app.post, *args, **kwargs)
 
-    def post(self, path, data={}, status=200, tojson=False, **kwargs):
-        res = self.app.post(self.PATH + path, data=data, **kwargs)
-        self.assertEqual(res.status_code, status)
-        if tojson:
-            res.json = json.loads(res.data)
+    def put(self, *args, **kwargs):
+        return self.query(self.app.put, *args, **kwargs)
 
-        return res
+    def delete(self, *args, **kwargs):
+        return self.query(self.app.delete, *args, **kwargs)
 
-    def put(self, path, data={}, status=200, tojson=False, **kwargs):
-        res = self.app.put(self.PATH + path, data=data, **kwargs)
-        self.assertEqual(res.status_code, status)
-        if tojson:
-            res.json = json.loads(res.data)
+    def query(self, f, path, data={}, status=200, tojson=False, **kwargs):
+        headers = kwargs.pop('headers', [])
+        if self.apikey:
+            headers += [('apikey', self.apikey)]
 
-        return res
-
-    def delete(self, path, data={}, status=200, tojson=False, **kwargs):
-        res = self.app.delete(self.PATH + path, data=data, **kwargs)
+        res = f(self.PATH + path, data=data, headers=headers, **kwargs)
         self.assertEqual(res.status_code, status)
         if tojson:
             res.json = json.loads(res.data)

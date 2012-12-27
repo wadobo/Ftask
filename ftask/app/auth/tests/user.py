@@ -7,29 +7,15 @@ from ...tests.base import BaseTestCase
 class UserTestCase(BaseTestCase):
     PATH = '/api/users'
 
-    def add_test_data(self):
-        users = [
-            {'username': 'danigm',
-             'password': '123',
-             'email': 'danigm@wadobo.com'},
-        ]
-        users += [{'username': 'user%d' % i,
-                   'password': '123',
-                   'email': 'user%d@wadobo.com' %i}\
-                   for i in range(10)]
-        for u in users:
-            # registering using register view...
-            self.post('/register/', data=u, status=200)
-
     def test_register(self):
         # Bad data
         data = { 'username': 'danigm' }
         res = self.post('/register/', data=data, status=400)
 
         # all ok
-        data = { 'username': 'danigm',
+        data = { 'username': 'pepe',
                  'password': '123',
-                 'email': 'danigm@wadobo.com'}
+                 'email': 'pepe@wadobo.com'}
         res = self.post('/register/', data=data, status=200)
 
         # already registered user
@@ -38,19 +24,10 @@ class UserTestCase(BaseTestCase):
 
     def test_list(self):
         res = self.get('/', status=200, tojson=True)
-        self.assertEqual(res.json['meta']['total'], 0)
-
-        # adding people
-        self.add_test_data()
-
-        res = self.get('/', status=200, tojson=True)
         self.assertEqual(res.json['meta']['total'], 11)
         self.assertEqual(res.json['objects'][0]['username'], 'danigm')
 
     def test_login(self):
-        # adding people
-        self.add_test_data()
-
         # Not logged
         self.get('/profile/', status=401)
 
@@ -73,9 +50,6 @@ class UserTestCase(BaseTestCase):
         self.get('/profile/', status=200, tojson=True, headers=headers)
 
     def test_logout(self):
-        # adding people
-        self.add_test_data()
-
         # Not logged
         self.get('/profile/', status=401)
 
@@ -93,3 +67,12 @@ class UserTestCase(BaseTestCase):
 
         # Logged out
         self.get('/profile/', status=401, headers=headers)
+
+    def test_baselogin(self):
+        self.get('/profile/', status=401)
+
+        self.login('danigm', '123')
+        self.get('/profile/', status=200, tojson=True)
+        self.logout()
+
+        self.get('/profile/', status=401)
