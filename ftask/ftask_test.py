@@ -6,7 +6,7 @@ import unittest
 
 
 from app.auth.tests.user import UserTestCase
-#from app.board.tests.board import BoardTestCase
+from app.board.tests.board import BoardTestCase
 
 
 if __name__ == '__main__':
