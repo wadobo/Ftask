@@ -101,6 +101,9 @@ def logout():
         g.user = None
     if g.apikey:
         delete_apikey(g.apikey)
+        g.apikey = None
+
+    return jsonify(status="success")
 
 
 @auth.route('/profile/', methods=['GET', 'POST'])

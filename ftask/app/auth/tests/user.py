@@ -51,6 +51,9 @@ class UserTestCase(BaseTestCase):
         # adding people
         self.add_test_data()
 
+        # Not logged
+        self.get('/profile/', status=401)
+
         # No user
         data = {'username': 'pepe', 'password': 'abc'}
         res = self.post('/login/', data=data, status=400)
@@ -59,12 +62,34 @@ class UserTestCase(BaseTestCase):
         data = {'username': 'danigm', 'password': 'abc'}
         res = self.post('/login/', data=data, status=400)
 
-        # All ok
+        # Loggin ok
         data = {'username': 'danigm', 'password': '123'}
         res = self.post('/login/', data=data, status=200, tojson=True)
         assert 'Authorization' in res.headers
         apikey = res.headers['Authorization']
 
+        # Getting auth view
         headers = [('apikey', apikey)]
-        res = self.get('/profile/', status=200, tojson=True, headers=headers)
-        print res.json
+        self.get('/profile/', status=200, tojson=True, headers=headers)
+
+    def test_logout(self):
+        # adding people
+        self.add_test_data()
+
+        # Not logged
+        self.get('/profile/', status=401)
+
+        # Loggin ok
+        data = {'username': 'danigm', 'password': '123'}
+        res = self.post('/login/', data=data, status=200, tojson=True)
+        apikey = res.headers['Authorization']
+
+        # Getting auth view
+        headers = [('apikey', apikey)]
+        self.get('/profile/', status=200, tojson=True, headers=headers)
+
+        # Login out
+        self.post('/logout/', status=200, tojson=True, headers=headers)
+
+        # Logged out
+        self.get('/profile/', status=401, headers=headers)

@@ -90,5 +90,17 @@ def user_by_apikey(apikey):
 
 
 def delete_apikey(apikey):
-    # TODO doit :P
-    pass
+    db = get_db()
+    c = db.apikeys
+    keys = c.find_one({'keys.key': apikey})
+    if not keys:
+        return None
+
+    for k in keys['keys']:
+        if k['key'] == apikey and valid_apikey(k):
+            # deleting apikey
+            keys['keys'].remove(k)
+            c.save(keys)
+            break
+
+    return None
