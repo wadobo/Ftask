@@ -8,7 +8,17 @@ class BoardTestCase(BaseTestCase):
     PATH = '/api/boards'
 
     def add_test_data(self):
-        pass
+        self.login('danigm', '123')
+        datas = [{ 'name': 'board%s' % i } for i in range(10)]
+        for data in datas:
+            res = self.post('/new/', data=data, status=200)
+        self.logout()
+
+        self.login('user1', '123')
+        datas = [{ 'name': 'user1 board %s' % i } for i in range(5)]
+        for data in datas:
+            res = self.post('/new/', data=data, status=200)
+        self.logout()
 
     def test_creation(self):
         # Bad data
@@ -21,9 +31,21 @@ class BoardTestCase(BaseTestCase):
 
         # already created board
         res = self.post('/new/', data=data, status=400)
+        self.logout()
 
     def test_list(self):
-        pass
+        self.add_test_data()
+        self.login('danigm', '123')
+        res = self.get('/', status=200, tojson=True)
+        self.assertEqual(res.json['meta']['total'], 10)
+        self.logout()
+
+        self.login('user1', '123')
+        res = self.get('/', status=200, tojson=True)
+        self.assertEqual(res.json['meta']['total'], 5)
+        for i in range(5):
+            self.assertEqual(res.json['objects'][i]['name'], 'user1 board %s' % i)
+        self.logout()
 
     def test_view(self):
         pass
