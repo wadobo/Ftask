@@ -19,8 +19,11 @@ from __future__ import division, absolute_import
 from flask import g
 from flask import abort
 
+from functools import wraps
+
 
 def authenticated(view):
+    @wraps(view)
     def deco_view(*args, **kwargs):
         if not g.user:
             raise abort(401)
