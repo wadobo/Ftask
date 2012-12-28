@@ -62,9 +62,7 @@ def new_board():
     return jsonify(status="success")
 
 
-@board.route('/view/<boardid>')
-@authenticated
-def view_board(boardid):
+def get_board_by_id(boardid):
     c = get_db().boards
     b = c.find_one({'_id': ObjectId(boardid),
                     'user': g.user['username']})
@@ -72,4 +70,33 @@ def view_board(boardid):
     if not b:
         raise abort(404)
 
-    return jsonify(to_json(b))
+    return b
+
+
+@board.route('/<boardid>', methods=['GET', 'PUT', 'DELETE'])
+@authenticated
+def view_board(boardid):
+    b = get_board_by_id(boardid)
+    if request.method == 'GET':
+        return jsonify(to_json(b))
+    elif request.method == 'PUT':
+        update_board(b, g.user, request.form)
+    elif request.method == 'DELETE':
+        delete_board(b, g.user)
+
+    return jsonify(status="success")
+
+
+def update_board(board, user, newdata):
+    if not board['user'] == user['username']:
+        raise abort(401)
+
+    board['name'] = newdata['name']
+    get_db().boards.save(board)
+
+
+def delete_board(board, user):
+    if not board['user'] == user['username']:
+        raise abort(401)
+
+    get_db().boards.remove(board)

@@ -53,18 +53,37 @@ class BoardTestCase(BaseTestCase):
         res = self.get('/', status=200, tojson=True)
         board = res.json['objects'][0]
 
-        res = self.get('/view/%s' % board['id'], status=200, tojson=True)
+        res = self.get('/%s' % board['id'], status=200, tojson=True)
         self.assertEqual(res.json['name'], board['name'])
         self.assertEqual(res.json['id'], board['id'])
         self.logout()
 
-        res = self.get('/view/%s' % board['id'], status=401)
+        res = self.get('/%s' % board['id'], status=401)
         self.login('user1', '123')
-        res = self.get('/view/%s' % board['id'], status=404)
+        res = self.get('/%s' % board['id'], status=404)
         self.logout()
 
     def test_update(self):
-        pass
+        self.add_test_data()
+        self.login('danigm', '123')
+        res = self.get('/', status=200, tojson=True)
+        board = res.json['objects'][0]
+
+        data = {'name': 'newname'}
+        res = self.put('/%s' % board['id'], data=data, status=200, tojson=True)
+
+        res = self.get('/', status=200, tojson=True)
+        for b in res.json['objects']:
+            if b['id'] == board['id']:
+                self.assertEqual(b['name'], 'newname')
 
     def test_deletion(self):
-        pass
+        self.add_test_data()
+        self.login('danigm', '123')
+        res = self.get('/', status=200, tojson=True)
+        board = res.json['objects'][0]
+
+        res = self.delete('/%s' % board['id'], status=200, tojson=True)
+
+        res = self.get('/', status=200, tojson=True)
+        self.assertEqual(res.json['meta']['total'], 9)
