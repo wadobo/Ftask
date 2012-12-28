@@ -32,7 +32,7 @@ board = Blueprint('board', __name__, template_folder='templates')
 @board.route('/')
 @authenticated
 def list_boards():
-    boards = get_db().boards.find()
+    boards = get_db().boards.find({'user': g.user['username']})
     meta = {}
     meta['total'] = boards.count()
     objs = [to_json(i) for i in boards]
