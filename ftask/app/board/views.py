@@ -25,6 +25,8 @@ from flask import g
 from ..db import get_db, to_json
 from ..auth.decorators import authenticated
 
+from bson.objectid import ObjectId
+
 
 board = Blueprint('board', __name__, template_folder='templates')
 
@@ -58,3 +60,16 @@ def new_board():
     c.insert(board)
 
     return jsonify(status="success")
+
+
+@board.route('/view/<boardid>')
+@authenticated
+def view_board(boardid):
+    c = get_db().boards
+    b = c.find_one({'_id': ObjectId(boardid),
+                    'user': g.user['username']})
+
+    if not b:
+        raise abort(404)
+
+    return jsonify(to_json(b))

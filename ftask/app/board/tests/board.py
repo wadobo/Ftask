@@ -48,7 +48,20 @@ class BoardTestCase(BaseTestCase):
         self.logout()
 
     def test_view(self):
-        pass
+        self.add_test_data()
+        self.login('danigm', '123')
+        res = self.get('/', status=200, tojson=True)
+        board = res.json['objects'][0]
+
+        res = self.get('/view/%s' % board['id'], status=200, tojson=True)
+        self.assertEqual(res.json['name'], board['name'])
+        self.assertEqual(res.json['id'], board['id'])
+        self.logout()
+
+        res = self.get('/view/%s' % board['id'], status=401)
+        self.login('user1', '123')
+        res = self.get('/view/%s' % board['id'], status=404)
+        self.logout()
 
     def test_update(self):
         pass
