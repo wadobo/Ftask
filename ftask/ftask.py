@@ -22,6 +22,10 @@ from app.auth.views import auth, auth_before_request
 from app.board.views import board
 
 
+from interface.auth.views import authi
+from interface.auth.views import generate_csrf_token
+
+
 # configuration
 DEBUG = True
 DATABASE = 'ftask'
@@ -38,9 +42,15 @@ def before_request():
     auth_before_request()
 
 
-# blueprints
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
+
+
+# api blueprints
 app.register_blueprint(auth, url_prefix='/api/users')
 app.register_blueprint(board, url_prefix='/api/boards')
+
+# interface blueprints
+app.register_blueprint(authi, url_prefix='/auth')
 
 
 # basic views
