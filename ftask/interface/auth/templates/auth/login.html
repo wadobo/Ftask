@@ -11,28 +11,17 @@
     {{ csrf_token()|safe }}
     <input type="text" id="username" name="username" placeholder="username"/>
     <input type="password" id="password" name="password" placeholder="password"/>
-    <input type="button" id="login" value="Login"/>
+    <input type="submit" id="login" value="Login"/>
 </form>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <script type="text/javascript">
-        // TODO move this to a js file
-        function on_login(data) {
-            var next = $("#login-form").data("next");
-            if (data.status === "success") {
-                window.location.href = next;
-            }
-        }
-
-        $("#login-form").submit(function() {
-            var url = $("#login-form").data("url");
-            var data = {'username': $("#username").val(),
-                        'password': $("#password").val()};
-            // TODO loading
-            $.post(url, data, on_login)
-            return false;
-        });
+        ftask_form("#login-form",
+                   function(data) {
+                        alert("ERROR");
+                   });
     </script>
 {% endblock %}

@@ -27,9 +27,20 @@ from .apikey import new_user_apikey, user_by_apikey, delete_apikey
 from .decorators import authenticated
 
 from hashlib import sha256
+import string
+import random
+import datetime
 
 
 auth = Blueprint('auth', __name__, template_folder='templates')
+
+
+def generate_csrf_token():
+    if '_csrf_token' not in session:
+        choices = string.ascii_letters + string.digits
+        token = ''.join(random.choice(choices) for x in range(20))
+        session['_csrf_token'] = token
+    return '<input name="_csrf_token" type="hidden" value="%s">' % session['_csrf_token']
 
 
 def auth_before_request():
@@ -37,6 +48,12 @@ def auth_before_request():
     g.apikey = None
     if 'user_id' in session:
         g.user = get_db().users.find_one({'username': session['user_id']})
+
+        # checking csrf
+        if request.method in ["POST", "PUT", "DELETE"]:
+            token = session.pop('_csrf_token', None)
+            if not token or token != request.form.get('_csrf_token'):
+                abort(400)
 
     if 'apikey' in request.headers:
         g.user = user_by_apikey(request.headers['apikey'])

@@ -19,11 +19,11 @@ from __future__ import division, absolute_import
 from flask import Flask
 from flask import render_template
 from app.auth.views import auth, auth_before_request
+from app.auth.views import generate_csrf_token
 from app.board.views import board
 
 
 from interface.auth.views import authi
-from interface.auth.views import generate_csrf_token
 
 
 # configuration

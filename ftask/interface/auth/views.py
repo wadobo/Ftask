@@ -26,29 +26,10 @@ from flask import render_template
 from flask import url_for
 from .decorators import authenticated
 
-import string
-import random
-import datetime
 
-
-authi = Blueprint('authi', __name__, template_folder='templates')
-
-
-# csrf protection
-@authi.before_request
-def csrf_protect():
-    if request.method == "POST":
-        token = session.pop('_csrf_token', None)
-        if not token or token != request.form.get('_csrf_token'):
-            abort(400)
-
-
-def generate_csrf_token():
-    if '_csrf_token' not in session:
-        choices = string.ascii_letters + string.digits
-        token = ''.join(random.choice(choices) for x in range(20))
-        session['_csrf_token'] = token
-    return '<input name="_csrf_token" type="hidden" value="%s">' % session['_csrf_token']
+authi = Blueprint('authi', __name__,
+                  template_folder='templates',
+                  static_folder='static')
 
 
 @authi.route('/register/', methods=['GET'])
