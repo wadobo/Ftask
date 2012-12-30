@@ -50,6 +50,12 @@ def csrf_token():
 def auth_before_request():
     g.user = None
     g.apikey = None
+
+    if 'apikey' in request.headers:
+        g.user = user_by_apikey(request.headers['apikey'])
+        g.apikey = request.headers['apikey']
+        return
+
     if 'user_id' in session:
         g.user = get_db().users.find_one({'username': session['user_id']})
 
@@ -58,10 +64,6 @@ def auth_before_request():
             token = session.pop('_csrf_token', None)
             if not token or token != request.values.get('_csrf_token'):
                 abort(400)
-
-    if 'apikey' in request.headers:
-        g.user = user_by_apikey(request.headers['apikey'])
-        g.apikey = request.headers['apikey']
 
 
 @auth.route('/')
