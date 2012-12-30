@@ -19,11 +19,12 @@ from __future__ import division, absolute_import
 from flask import Flask
 from flask import render_template
 from app.auth.views import auth, auth_before_request
-from app.auth.views import generate_csrf_token
+from app.auth.views import csrf_token
 from app.board.views import board
 
 
 from interface.auth.views import authi
+from interface.board.views import boardi
 
 
 # configuration
@@ -42,7 +43,7 @@ def before_request():
     auth_before_request()
 
 
-app.jinja_env.globals['csrf_token'] = generate_csrf_token
+app.jinja_env.globals['csrf_token'] = csrf_token
 
 
 # api blueprints
@@ -51,6 +52,7 @@ app.register_blueprint(board, url_prefix='/api/boards')
 
 # interface blueprints
 app.register_blueprint(authi, url_prefix='/auth')
+app.register_blueprint(boardi, url_prefix='/board')
 
 
 # basic views

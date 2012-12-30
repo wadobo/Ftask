@@ -34,13 +34,17 @@ import datetime
 
 auth = Blueprint('auth', __name__, template_folder='templates')
 
-
 def generate_csrf_token():
     if '_csrf_token' not in session:
         choices = string.ascii_letters + string.digits
         token = ''.join(random.choice(choices) for x in range(20))
         session['_csrf_token'] = token
-    return '<input name="_csrf_token" type="hidden" value="%s">' % session['_csrf_token']
+
+    return session['_csrf_token']
+
+
+def csrf_token():
+    return '<input name="_csrf_token" id="csrf_token" type="hidden" value="%s">' % generate_csrf_token()
 
 
 def auth_before_request():
@@ -52,7 +56,7 @@ def auth_before_request():
         # checking csrf
         if request.method in ["POST", "PUT", "DELETE"]:
             token = session.pop('_csrf_token', None)
-            if not token or token != request.form.get('_csrf_token'):
+            if not token or token != request.values.get('_csrf_token'):
                 abort(400)
 
     if 'apikey' in request.headers:
@@ -128,3 +132,9 @@ def logout():
 @authenticated
 def profile():
     return jsonify(to_json(g.user, excludes=['password']))
+
+
+@auth.route('/csrf_token/')
+@authenticated
+def csrf_token_view():
+    return jsonify(token=generate_csrf_token())

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Board list{% endblock %}
+
+{% block header %}
+    <h1>Ftask board list</h1>
+{% endblock %}
+
+{% block content %}
+{{ csrf_token()|safe }}
+
+<form method="POST" id="board-form" data-url="{{ url_for('board.new_board') }}">
+    <input type="text" id="boardname" name="name" placeholder="board name"/>
+    <input type="submit" value="Add"/>
+</form>
+
+<ul id="board-list">
+</ul>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>
+
+    <script type="text/template" id="board-template">
+        <a href="/board/<%= id %>"><%= name %></a>
+        <a href="#" onclick="delete_board('/api/boards/<%= id %>'); return false;">x</a>
+    </script>
+
+    <script type="text/javascript">
+        var Board = Backbone.Model.extend({});
+        var Boards = Backbone.Collection.extend({
+            model: Board,
+            parse: function(response) {
+                $("#board-list").empty();
+                var models = new Array();
+                for (var i=0; i<response.meta.total; i++) {
+                    var model = new Board(response.objects[i]);
+                    var view = new BoardView({model: model});
+                    $("#board-list").append(view.render().el);
+                    models.push(model);
+                }
+                return models;
+            },
+            url: '/api/boards/'
+        });
+
+        var BoardView = Backbone.View.extend({
+            tagName: "li",
+            template: _.template($('#board-template').html()),
+
+            initialize: function() {
+                this.listenTo(this.model, 'change', this.render);
+                this.listenTo(this.model, 'destroy', this.remove);
+            },
+
+            render: function() {
+                this.$el.html(this.template(this.model.toJSON()));
+                return this;
+            },
+
+        });
+    </script>
+
+    <script type="text/javascript">
+        var boards = new Boards();
+        boards.fetch();
+
+        ftask_form("#board-form",
+                   function(data) {
+                        alert("ERROR");
+                   },
+                   function(data) {
+                        boards.fetch();
+                   });
+
+        setInterval('boards.fetch()', 5000);
+
+        function delete_board(url) {
+            var token = $("#csrf_token").val();
+            var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
+            req.done(function(data) {
+                boards.fetch();
+                ftask_update_csrf();
+            });
+            req.fail(function(data) {
+                alert("ERROR");
+                ftask_update_csrf();
+            });
+        }
+    </script>
+
+{% endblock %}
