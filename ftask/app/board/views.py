@@ -44,3 +44,17 @@ from .list_views import new_board_list
 board.add_url_rule(view_board_lists.path, 'lists', view_board_lists)
 board.add_url_rule(new_board_list.path, 'new_list', new_board_list)
 board.add_url_rule(view_board_list.path, 'view_list', view_board_list)
+
+###############
+# LISTS TASKS #
+###############
+
+from .task_views import view_board_tasks
+from .task_views import view_list_tasks
+from .task_views import view_list_task
+from .task_views import new_list_task
+
+board.add_url_rule(view_board_tasks.path, 'tasks', view_board_tasks)
+board.add_url_rule(view_list_tasks.path, 'list_tasks', view_list_tasks)
+board.add_url_rule(view_list_task.path, 'view_task', view_list_task)
+board.add_url_rule(new_list_task.path, 'new_task', new_list_task)
