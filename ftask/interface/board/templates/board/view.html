@@ -24,7 +24,7 @@
 
     <script type="text/template" id="list-template">
         <%= name %>
-        <a href="#" onclick="delete_list('/api/boards/{{ boardid }}/lists/<%= id %>'); return false;">x</a>
+        <a href="#" onclick="delete_list('/api/boards/{{ boardid }}/lists/<%= id %>/'); return false;">x</a>
     </script>
 
     <script type="text/javascript">
@@ -65,6 +65,11 @@
     <script type="text/javascript">
         var ls = new Lists();
         ls.fetch();
+
+        $.get('/api/boards/{{ boardid }}/', function(data) {
+            $(".boardname").html(data.name);
+            $("title").html($("title").html() + ' - ' + data.name);
+        });
 
         ftask_form("#list-form",
                    function(data) {
