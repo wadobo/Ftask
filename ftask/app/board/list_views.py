@@ -67,7 +67,7 @@ def view_board_list(boardid, listid):
         delete_board_list(b, listid, g.user)
 
     return jsonify(status="success")
-view_board_list.path = '/<boardid>/lists/<listid>'
+view_board_list.path = '/<boardid>/lists/<listid>/'
 view_board_list.methods = ['GET', 'PUT', 'DELETE']
 
 

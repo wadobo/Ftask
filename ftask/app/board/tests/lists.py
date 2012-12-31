@@ -72,15 +72,15 @@ class ListsTestCase(BoardTestCase):
         res = self.get('/', status=200, tojson=True)
         l = res.json['objects'][0]
 
-        res = self.get('/%s' % l['id'], status=200, tojson=True)
+        res = self.get('/%s/' % l['id'], status=200, tojson=True)
         self.assertEqual(res.json['name'], l['name'])
         self.assertEqual(res.json['id'], l['id'])
         self.logout()
 
-        res = self.get('/%s' % l['id'], status=401)
+        res = self.get('/%s/' % l['id'], status=401)
         self.login('user1', '123')
         self.set_first_board_path()
-        res = self.get('/%s' % l['id'], status=404)
+        res = self.get('/%s/' % l['id'], status=404)
         self.logout()
 
     def test_update(self):
@@ -91,7 +91,7 @@ class ListsTestCase(BoardTestCase):
         l = res.json['objects'][0]
 
         data = {'name': 'newname'}
-        res = self.put('/%s' % l['id'], data=data, status=200, tojson=True)
+        res = self.put('/%s/' % l['id'], data=data, status=200, tojson=True)
 
         res = self.get('/', status=200, tojson=True)
         for i in res.json['objects']:
@@ -105,7 +105,7 @@ class ListsTestCase(BoardTestCase):
         res = self.get('/', status=200, tojson=True)
         l = res.json['objects'][0]
 
-        res = self.delete('/%s' % l['id'], status=200, tojson=True)
+        res = self.delete('/%s/' % l['id'], status=200, tojson=True)
 
         res = self.get('/', status=200, tojson=True)
         self.assertEqual(res.json['meta']['total'], 12)

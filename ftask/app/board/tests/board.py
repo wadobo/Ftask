@@ -53,14 +53,14 @@ class BoardTestCase(BaseTestCase):
         res = self.get('/', status=200, tojson=True)
         board = res.json['objects'][0]
 
-        res = self.get('/%s' % board['id'], status=200, tojson=True)
+        res = self.get('/%s/' % board['id'], status=200, tojson=True)
         self.assertEqual(res.json['name'], board['name'])
         self.assertEqual(res.json['id'], board['id'])
         self.logout()
 
-        res = self.get('/%s' % board['id'], status=401)
+        res = self.get('/%s/' % board['id'], status=401)
         self.login('user1', '123')
-        res = self.get('/%s' % board['id'], status=404)
+        res = self.get('/%s/' % board['id'], status=404)
         self.logout()
 
     def test_update(self):
@@ -70,7 +70,7 @@ class BoardTestCase(BaseTestCase):
         board = res.json['objects'][0]
 
         data = {'name': 'newname'}
-        res = self.put('/%s' % board['id'], data=data, status=200, tojson=True)
+        res = self.put('/%s/' % board['id'], data=data, status=200, tojson=True)
 
         res = self.get('/', status=200, tojson=True)
         for b in res.json['objects']:
@@ -83,7 +83,7 @@ class BoardTestCase(BaseTestCase):
         res = self.get('/', status=200, tojson=True)
         board = res.json['objects'][0]
 
-        res = self.delete('/%s' % board['id'], status=200, tojson=True)
+        res = self.delete('/%s/' % board['id'], status=200, tojson=True)
 
         res = self.get('/', status=200, tojson=True)
         self.assertEqual(res.json['meta']['total'], 9)
