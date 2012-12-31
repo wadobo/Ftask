@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Board View{% endblock %}
+
+{% block header %}
+    <h1>Ftask board view <span class="boardname"></span></h1>
+{% endblock %}
+
+{% block content %}
+{{ csrf_token()|safe }}
+
+<form method="POST" id="list-form" data-url="{{ url_for('board.new_list', boardid=boardid) }}">
+    <input type="text" id="listname" name="name" placeholder="list name"/>
+    <input type="submit" value="Add"/>
+</form>
+
+<ul id="list-list">
+</ul>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>
+
+    <script type="text/template" id="list-template">
+        <%= name %>
+        <a href="#" onclick="delete_list('/api/boards/{{ boardid }}/lists/<%= id %>'); return false;">x</a>
+    </script>
+
+    <script type="text/javascript">
+        var List = Backbone.Model.extend({});
+        var Lists = Backbone.Collection.extend({
+            model: List,
+            parse: function(response) {
+                $("#list-list").empty();
+                var models = new Array();
+                for (var i=0; i<response.meta.total; i++) {
+                    var model = new List(response.objects[i]);
+                    var view = new ListView({model: model});
+                    $("#list-list").append(view.render().el);
+                    models.push(model);
+                }
+                return models;
+            },
+            url: '/api/boards/{{ boardid }}/lists/'
+        });
+
+        var ListView = Backbone.View.extend({
+            tagName: "li",
+            template: _.template($('#list-template').html()),
+
+            initialize: function() {
+                this.listenTo(this.model, 'change', this.render);
+                this.listenTo(this.model, 'destroy', this.remove);
+            },
+
+            render: function() {
+                this.$el.html(this.template(this.model.toJSON()));
+                return this;
+            },
+
+        });
+    </script>
+
+    <script type="text/javascript">
+        var ls = new Lists();
+        ls.fetch();
+
+        ftask_form("#list-form",
+                   function(data) {
+                        alert("ERROR");
+                   },
+                   function(data) {
+                        ls.fetch();
+                   });
+
+        setInterval('ls.fetch()', 5000);
+
+        function delete_list(url) {
+            var token = $("#csrf_token").val();
+            var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
+            req.done(function(data) {
+                ls.fetch();
+                ftask_update_csrf();
+            });
+            req.fail(function(data) {
+                alert("ERROR");
+                ftask_update_csrf();
+            });
+        }
+    </script>
+
+{% endblock %}

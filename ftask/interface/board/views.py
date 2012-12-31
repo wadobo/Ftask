@@ -30,3 +30,9 @@ boardi = Blueprint('boardi', __name__,
 @authenticated
 def list_board():
     return render_template('board/list.html')
+
+
+@boardi.route('/<boardid>', methods=['GET'])
+@authenticated
+def view_board(boardid):
+    return render_template('board/view.html', boardid=boardid)
