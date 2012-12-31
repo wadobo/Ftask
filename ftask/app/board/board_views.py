@@ -52,6 +52,11 @@ def new_board():
     if c.find(board).count():
         raise abort(400)
 
+    from .list_views import add_list
+    add_list(board, 'TODO')
+    add_list(board, 'DOING')
+    add_list(board, 'DONE')
+
     c.insert(board)
 
     return jsonify(status="success")

@@ -54,15 +54,15 @@ class ListsTestCase(BoardTestCase):
         self.login('danigm', '123')
         self.set_first_board_path()
         res = self.get('/', status=200, tojson=True)
-        self.assertEqual(res.json['meta']['total'], 10)
+        self.assertEqual(res.json['meta']['total'], 13)
         self.logout()
 
         self.login('user1', '123')
         self.set_first_board_path()
         res = self.get('/', status=200, tojson=True)
-        self.assertEqual(res.json['meta']['total'], 5)
+        self.assertEqual(res.json['meta']['total'], 8)
         for i in range(5):
-            self.assertEqual(res.json['objects'][i]['name'], 'user1 list %s' % i)
+            self.assertEqual(res.json['objects'][i+3]['name'], 'user1 list %s' % i)
         self.logout()
 
     def test_view(self):
@@ -108,4 +108,4 @@ class ListsTestCase(BoardTestCase):
         res = self.delete('/%s' % l['id'], status=200, tojson=True)
 
         res = self.get('/', status=200, tojson=True)
-        self.assertEqual(res.json['meta']['total'], 9)
+        self.assertEqual(res.json['meta']['total'], 12)

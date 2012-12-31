@@ -45,14 +45,7 @@ def new_board_list(boardid):
     b = get_board_by_id(boardid)
     name = request.form['name']
 
-    ls = {'name': name, 'id': ObjectId().binary.encode("hex")}
-
-    for l in b.get('lists', []):
-        if name == l['name']:
-            raise abort(400)
-
-    b['lists'] = b.get('lists', []) + [ls]
-
+    add_list(b, name)
     c.save(b)
 
     return jsonify(status="success")
@@ -104,3 +97,14 @@ def delete_board_list(board, lid, user):
         ls.pop(index)
 
     get_db().boards.save(board)
+
+
+def add_list(board, name):
+    ls = {'name': name, 'id': ObjectId().binary.encode("hex")}
+
+    # not with the same name
+    for l in board.get('lists', []):
+        if name == l['name']:
+            raise abort(400)
+
+    board['lists'] = board.get('lists', []) + [ls]
