@@ -47,6 +47,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
         <link href="{{ url_for('static', filename='bootstrap/css/bootstrap.css') }}" rel="stylesheet">
         <link href="{{ url_for('static', filename='bootstrap/css/bootstrap-responsive.css') }}" rel="stylesheet">
+
+        <link href="{{ url_for('static', filename='css/loading.css') }}" rel="stylesheet">
         {% block extrahead %}
         {% endblock %}
     </head>
@@ -70,6 +72,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         {% block footer %}
         {% endblock %}
         </footer>
+        </div>
+
+        <div id="loading">
+            <div class="overlay">
+            <ul class="spinner">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+            <div class="loading-text">
+            Loading
+            </div>
+            </div>
+        </div>
+
+        <div id="mini-loading">
+            <i class="icon-refresh icon-white"></i> Loading
         </div>
 
         {% block scripts %}
