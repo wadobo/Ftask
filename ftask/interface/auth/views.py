@@ -48,4 +48,4 @@ def login():
 @authi.route('/profile/', methods=['GET'])
 @authenticated
 def profile():
-    return render_template('auth/profile.html', user=g.user)
+    return render_template('auth/profile.html', user=g.user, selected="profile")

@@ -2,8 +2,8 @@
     <div class="navbar-inner">
         <a class="brand" href="#">Ftask</a>
         <ul class="nav">
-            <li class="active"><a href="#">Profile</a></li>
-            <li class="pull-right"><a href="{{ url_for('boardi.list_board') }}">Boards</a></li>
+            <li {% if selected == "profile" %}class="active"{% endif %}><a href="{{ url_for('authi.profile') }}">Profile</a></li>
+            <li {% if selected == "board" %}class="active"{% endif %}><a href="{{ url_for('boardi.list_board') }}">Boards</a></li>
         </ul>
         <div class="btn-group pull-right">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#">

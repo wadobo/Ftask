@@ -1,0 +1,22 @@
+.bold-list li{
+    padding:2px 0;
+    border-bottom:1px solid #dcdcdc;
+    position:relative;
+    zoom:1;
+    padding: 3px 15px;
+}
+
+.bold-list li:hover, .bold-list li:hover a {
+    color: rgb(255, 255, 255);
+    text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.2);
+    background-color: rgb(0, 136, 204);
+}
+
+.board-title h3 {
+    display: inline-block;
+}
+
+.board-title a {
+    color: #aaa;
+    padding-left: 10px;
+}

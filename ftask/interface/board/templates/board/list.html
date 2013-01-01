@@ -1,28 +1,48 @@
-{% extends "base.html" %}
+{% extends "auth/profile.html" %}
 
 {% block title %}Board list{% endblock %}
 
 {% block header %}
-    <h1>Ftask board list</h1>
 {% endblock %}
 
-{% block content %}
-{{ csrf_token()|safe }}
+{% block main_content %}
 
-<form method="POST" id="board-form" data-url="{{ url_for('board.new_board') }}">
-    <input type="text" id="boardname" name="name" placeholder="board name"/>
-    <input type="submit" value="Add"/>
-</form>
+<div id="modal" class="modal hide fade">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>New Board</h3>
+    </div>
+    <div class="modal-body">
+        <form method="POST" id="board-form" class="form-horizontal" data-url="{{ url_for('board.new_board') }}">
+        <div class="control-group">
+            <label class="control-label" for="boardname">Board name</label>
+            <div class="controls">
+                <input type="text" id="boardname" name="name" placeholder="board name"/>
+                <button class="btn btn-info">Add</button>
+            </div>
+        </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+    </div>
+</div>
 
-<ul id="board-list">
+<div class="board-title">
+<h3>My Boards</h3>
+<a href="#" data-toggle="modal" data-target="#modal">New board...</a>
+</div>
+
+<ul id="board-list" class="unstyled bold-list">
 </ul>
+
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
     <script type="text/template" id="board-template">
         <a href="/board/<%= id %>"><%= name %></a>
-        <a href="#" onclick="delete_board('/api/boards/<%= id %>/'); return false;">x</a>
+        <a href="#" class="close" onclick="delete_board('/api/boards/<%= id %>/'); return false;">&times;</a>
     </script>
 
     <script type="text/javascript">
@@ -70,6 +90,7 @@
                    },
                    function(data) {
                         boards.fetch();
+                        $("#modal").modal("hide");
                    });
 
         setInterval('boards.fetch()', 5000);

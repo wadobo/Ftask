@@ -16,14 +16,16 @@
 {{ csrf_token()|safe }}
 <div class="row">
     <div class="span8">
+        {% block main_content %}
+        {% endblock %}
     </div>
     <div class="span3">
         <div class="well sidebar-nav">
             <div id="gravatar"> </div>
             <ul class="nav nav-list">
                 <li class="nav-header">@{{ g.user['username'] }}</li>
-                <li class="active"><a href="{{ url_for('authi.profile') }}">Profile</a></li>
-                <li ><a href="{{ url_for('boardi.list_board') }}">Boards</a></li>
+                <li {% if selected == "profile" %}class="active"{% endif %}><a href="{{ url_for('authi.profile') }}">Profile</a></li>
+                <li {% if selected == "board" %}class="active"{% endif %}><a href="{{ url_for('boardi.list_board') }}">Boards</a></li>
             </ul>
         </div>
 
