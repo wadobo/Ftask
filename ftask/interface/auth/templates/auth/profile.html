@@ -19,9 +19,6 @@
     </div>
     <div class="span3">
         <div id="gravatar"> </div>
-        <form class="hide" method="POST" id="logout-form" data-url="{{ url_for('auth.logout') }}" data-next="{{ url_for('authi.login') }}">
-            <input class="btn btn-warning" type="submit" value="Logout"/>
-        </form>
     </div>
 </div>
 
@@ -30,10 +27,6 @@
 {% block scripts %}
     {{ super() }}
     <script type="text/javascript">
-        ftask_form("#logout-form",
-                   function(data) {
-                        alert("ERROR");
-                   });
         $('#gravatar').html($.gravatar("{{ g.user['email'] }}", {'size': 170}));
     </script>
 {% endblock %}

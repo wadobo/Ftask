@@ -20,12 +20,18 @@
     </div>
 </div>
 
+<form class="hide" method="POST" id="logout-form" data-url="{{ url_for('auth.logout') }}" data-next="{{ url_for('authi.login') }}">
+    <input class="btn btn-warning" type="submit" value="Logout"/>
+</form>
+
 <script type="text/javascript">
     $(document).ready(function() {
         $('#logout').click(function() {
             $('#logout-form').submit();
             return false;
         });
+
+        ftask_form("#logout-form", function(data) { alert("ERROR"); });
         $('#gravatar-mini').html($.gravatar("{{ g.user['email'] }}", {'size': 30}));
     });
 </script>
