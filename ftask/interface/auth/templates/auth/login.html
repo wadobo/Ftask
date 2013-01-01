@@ -12,28 +12,30 @@
 
 {% block content %}
 <div class="row">
-<div class="span4 offset4">
-<form method="POST" class="form" id="login-form" data-url="{{ url_for('auth.login') }}" data-next="{{ next }}">
-    {{ csrf_token()|safe }}
-    <div class="control-group">
-        <label class="control-label" for="username">Username</label>
-        <div class="controls">
-            <input type="text" id="username" name="username" placeholder="username" autofocus/>
-        </div>
-    </div>
-    <div class="control-group">
-        <label class="control-label" for="password">Password</label>
-        <div class="controls">
-            <input type="password" id="password" name="password" placeholder="password"/>
-        </div>
-    </div>
-    <input class="btn btn-success btn-large" type="submit" id="login" value="Login"/>
-</form>
-    <div class="register">
-        New here? <a href="{{ url_for('authi.register') }}">Create an Account.</a>
-    </div>
-</div>
-</div>
+    <div class="span4 offset4">
+        <div class="well">
+            <form method="POST" class="form" id="login-form" data-url="{{ url_for('auth.login') }}" data-next="{{ next }}">
+                {{ csrf_token()|safe }}
+                <div class="control-group">
+                    <label class="control-label" for="username">Username</label>
+                    <div class="controls">
+                        <input type="text" id="username" name="username" placeholder="username" autofocus/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="password">Password</label>
+                    <div class="controls">
+                        <input type="password" id="password" name="password" placeholder="password"/>
+                    </div>
+                </div>
+                <input class="btn btn-success btn-large" type="submit" id="login" value="Login"/>
+            </form>
+            <div class="register">
+                New here? <a href="{{ url_for('authi.register') }}">Create an Account.</a>
+            </div>
+        </div><!-- well -->
+    </div><!-- span -->
+</div><!-- row -->
 {% endblock %}
 
 {% block scripts %}
