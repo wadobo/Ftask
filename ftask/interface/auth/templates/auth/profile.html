@@ -18,7 +18,15 @@
     <div class="span8">
     </div>
     <div class="span3">
-        <div id="gravatar"> </div>
+        <div class="well sidebar-nav">
+            <div id="gravatar"> </div>
+            <ul class="nav nav-list">
+                <li class="nav-header">@{{ g.user['username'] }}</li>
+                <li class="active"><a href="{{ url_for('authi.profile') }}">Profile</a></li>
+                <li ><a href="{{ url_for('boardi.list_board') }}">Boards</a></li>
+            </ul>
+        </div>
+
     </div>
 </div>
 
