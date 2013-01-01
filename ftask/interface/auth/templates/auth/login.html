@@ -3,21 +3,41 @@
 {% block title %}Login{% endblock %}
 
 {% block header %}
+<div class="row">
+<div class="span4 offset4">
     <h1>Ftask Login</h1>
+</div>
+</div>
 {% endblock %}
 
 {% block content %}
-<form method="POST" id="login-form" data-url="{{ url_for('auth.login') }}" data-next="{{ next }}">
+<div class="row">
+<div class="span4 offset4">
+<form method="POST" class="form" id="login-form" data-url="{{ url_for('auth.login') }}" data-next="{{ next }}">
     {{ csrf_token()|safe }}
-    <input type="text" id="username" name="username" placeholder="username"/>
-    <input type="password" id="password" name="password" placeholder="password"/>
-    <input type="submit" id="login" value="Login"/>
+    <div class="control-group">
+        <label class="control-label" for="username">Username</label>
+        <div class="controls">
+            <input type="text" id="username" name="username" placeholder="username" autofocus/>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label" for="password">Password</label>
+        <div class="controls">
+            <input type="password" id="password" name="password" placeholder="password"/>
+        </div>
+    </div>
+    <input class="btn btn-success btn-large" type="submit" id="login" value="Login"/>
 </form>
+    <div class="register">
+        New here? <a href="{{ url_for('authi.register') }}">Create an Account.</a>
+    </div>
+</div>
+</div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
-    <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <script type="text/javascript">
         ftask_form("#login-form",
                    function(data) {

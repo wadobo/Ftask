@@ -20,8 +20,6 @@
 
 {% block scripts %}
     {{ super() }}
-    <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>
-
     <script type="text/template" id="list-template">
         <%= name %>
         <a href="#" onclick="delete_list('/api/boards/{{ boardid }}/lists/<%= id %>/'); return false;">x</a>

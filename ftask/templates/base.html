@@ -44,11 +44,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <head>
         <meta charset="utf-8" />
         <title>Ftask - {% block title %}{% endblock %}</title>
+
+        <link href="{{ url_for('static', filename='bootstrap/css/bootstrap.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='bootstrap/css/bootstrap-responsive.css') }}" rel="stylesheet">
         {% block extrahead %}
         {% endblock %}
     </head>
 
     <body>
+        {% block prehead %}
+        {% endblock %}
+
+        <div class="container">
         <header id="header">
         {% block header %}
         {% endblock %}
@@ -63,11 +70,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         {% block footer %}
         {% endblock %}
         </footer>
+        </div>
 
         {% block scripts %}
             <script src="http://underscorejs.org/underscore.js"></script>
             <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
             <script src="http://backbonejs.org/backbone.js"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/md5.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.gravatar.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}"></script>
         {% endblock %}
     </body>
 </html>

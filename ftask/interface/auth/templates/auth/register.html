@@ -3,22 +3,47 @@
 {% block title %}Register{% endblock %}
 
 {% block header %}
+<div class="row">
+<div class="span4 offset4">
     <h1>Ftask Register</h1>
+</div>
+</div>
 {% endblock %}
 
 {% block content %}
-<form method="POST" id="register-form" data-url="{{ url_for('auth.register') }}" data-next="{{ url_for('authi.login') }}">
+<div class="row">
+<div class="span4 offset4">
+<form method="POST" class="form" id="register-form" data-url="{{ url_for('auth.register') }}" data-next="{{ url_for('authi.login') }}">
     {{ csrf_token()|safe }}
-    <input type="text" id="username" name="username" placeholder="username"/>
-    <input type="password" id="password" name="password" placeholder="password"/>
-    <input type="email" id="email" name="email" placeholder="email@example.com"/>
-    <input type="submit" id="login" value="Register"/>
+    <div class="control-group">
+        <label class="control-label" for="username">Username</label>
+        <div class="controls">
+            <input type="text" id="username" name="username" placeholder="username" autofocus/>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label" for="password">Password</label>
+        <div class="controls">
+            <input type="password" id="password" name="password" placeholder="password"/>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label" for="email">Email</label>
+        <div class="controls">
+            <input type="email" id="email" name="email" placeholder="email@example.com"/>
+        </div>
+    </div>
+    <input type="submit" class="btn btn-success btn-large" value="Create New Account"/>
 </form>
+<div>
+Already have an account? <a href="{{ url_for('authi.login') }}">Log In.</a>
+</div>
+</div>
+</div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
-    <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <script type="text/javascript">
         ftask_form("#register-form",
                    function(data) {
