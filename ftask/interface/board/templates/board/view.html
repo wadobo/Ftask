@@ -9,6 +9,28 @@
 {% block precontainer %}
 {{ csrf_token()|safe }}
 
+<!-- edit board name modal -->
+<div id="edit-board-modal" class="modal hide fade">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3><span class="boardname"></span></h3>
+    </div>
+    <div class="modal-body">
+        <form method="PUT" id="board-form" class="form-horizontal" data-url="{{ url_for('board.view_board', boardid=boardid) }}">
+        <div class="control-group">
+            <label class="control-label" for="boardname">Board name</label>
+            <div class="controls">
+                <input type="text" id="boardname" name="name" placeholder="board name"/>
+                <button class="btn btn-info">Update</button>
+            </div>
+        </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+    </div>
+</div>
+
 <!-- new list modal dialog -->
 <div id="modal" class="modal hide fade">
     <div class="modal-header">
@@ -36,7 +58,12 @@
     <div class="row">
         <!-- header -->
         <div class="span12">
-            <h4><span class="boardname"></span></h4>
+            <h4>
+                <span class="boardname"></span>
+                <button class="btn"
+                data-toggle="modal"
+                data-target="#edit-board-modal"><i class="icon-pencil"></i></button>
+            </h4>
         </div>
 
         <!-- board -->
@@ -127,10 +154,7 @@
 
         ls.fetch({update: true});
 
-        $.get('/api/boards/{{ boardid }}/', function(data) {
-            $(".boardname").html(data.name);
-            $("title").html($("title").html() + ' - ' + data.name);
-        });
+        update_board();
 
         ftask_form("#list-form",
                    function(data) {
@@ -139,6 +163,15 @@
                    function(data) {
                         ls.fetch({update: true});
                         $("#modal").modal("hide");
+                   });
+
+        ftask_form("#board-form",
+                   function(data) {
+                        alert("ERROR");
+                   },
+                   function(data) {
+                        $("#edit-board-modal").modal("hide");
+                        update_board();
                    });
 
         setInterval('ls.fetch({update: true})', 5000);
@@ -155,6 +188,14 @@
                 ftask_update_csrf();
             });
         }
+
+        function update_board() {
+            $.get('/api/boards/{{ boardid }}/', function(data) {
+                $(".boardname").html(data.name);
+                $("title").html($("title").html() + ' - ' + data.name);
+            });
+        }
+
         $('.gravatar-mini').each(function() {
             $(this).html($.gravatar($(this).data("email"), {'size': 30}));
         });

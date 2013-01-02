@@ -24,11 +24,12 @@ function ftask_form(id, onerror, onsuccess) {
     $(id).submit(function() {
         var url = $(id).data("url");
         var data = $(id).serialize();
+        var method = $(id).attr("method");
         data += "&_csrf_token="+$("#csrf_token").val();
 
         // TODO loading
         $("#loading").fadeIn();
-        var req = $.post(url, data);
+        var req = $.ajax({url:url, data:data, type:method});
 
         // DONE
         req.done(function(data) {
