@@ -52,12 +52,9 @@
         var Boards = Backbone.Collection.extend({
             model: Board,
             parse: function(response) {
-                $("#board-list").empty();
                 var models = new Array();
                 for (var i=0; i<response.meta.total; i++) {
                     var model = new Board(response.objects[i]);
-                    var view = new BoardView({model: model});
-                    $("#board-list").append(view.render().el);
                     models.push(model);
                 }
                 return models;
@@ -84,6 +81,18 @@
 
     <script type="text/javascript">
         var boards = new Boards();
+        var views = new Array();
+        boards.on("add", function(l) {
+            var view = new BoardView({model: l});
+            $("#board-list").append(view.render().el);
+            views.push(view);
+        });
+        boards.on("remove", function(l) {
+            var view = _.find(views, function(v) { return v.model === l});
+            view.remove();
+            views = _.filter(views, function(v) { return v.model != l });
+        });
+
         boards.fetch({update: true});
 
         ftask_form("#board-form",
