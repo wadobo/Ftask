@@ -99,10 +99,44 @@
 {% block scripts %}
     {{ super() }}
     <script type="text/template" id="list-template">
-        <%= name %>
+        <span class="name"><%= name %></span>
         <a href="#" class="close" onclick="delete_list('/api/boards/{{ boardid }}/lists/<%= id %>/'); return false;">&times;</a>
     </script>
 
+    <!-- doubleclick list name update -->
+    <script type="text/template" id="edit-listname-template">
+        <form method="PUT" data-url="/api/boards/{{ boardid }}/lists/<%= id %>/" class="form-horizontal">
+            <input type="text" name="name" value="<%= name %>" class="input-small"/>
+            <input class="btn btn-info" type="submit" value="Save"/>
+            <a href="#" class="close">&times;</a>
+        </form>
+    </script>
+    <script type="text/javascript">
+        function show_form(p, obj) {
+            if (p.find("#name-"+obj.id).length > 0) {
+                return;
+            }
+
+            var template = _.template($('#edit-listname-template').html());
+            var tmpl = template({id: obj.get('id'), name: obj.get('name')});
+            p.prepend(tmpl);
+            p.find(".close").click(function() {
+                $(this).parent().remove();
+            });
+            p.find("form").attr("id", "name-"+obj.id);
+
+            ftask_form("#name-"+obj.id,
+                       function(data) {
+                            alert("ERROR");
+                       },
+                       function(data) {
+                            $(this).remove();
+                            ls.fetch({update: true});
+                       });
+        }
+    </script>
+
+    <!-- backbone base -->
     <script type="text/javascript">
         var List = Backbone.Model.extend({
             idAttribute: "id"
@@ -132,12 +166,17 @@
 
             render: function() {
                 this.$el.html(this.template(this.model.toJSON()));
+                var model = this.model;
+                this.$el.find(".name").dblclick(function() {
+                    show_form($(this), model);
+                });
                 return this;
             },
 
         });
     </script>
 
+    <!-- this page stuff -->
     <script type="text/javascript">
         var ls = new Lists();
         var views = new Array();
