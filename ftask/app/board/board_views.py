@@ -93,7 +93,7 @@ def delete_board(board, user):
     if not board['user'] == user['username']:
         raise abort(401)
 
-    get_db().boards.remove(board)
+    get_db().boards.remove({'_id': board['_id']})
 
 
 def get_board_by_id(boardid):

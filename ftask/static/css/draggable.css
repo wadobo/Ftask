@@ -1,0 +1,20 @@
+[draggable] {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.list .header:hover {
+  cursor: move;
+}
+
+.list .header .name:hover {
+  cursor: text;
+}
+
+.dragging {
+    -webkit-transform: rotate(5deg);
+    -moz-transform: rotate(5deg);
+    transform: rotate(5deg);
+}

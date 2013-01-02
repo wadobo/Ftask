@@ -68,7 +68,7 @@
 
         <!-- board -->
         <div class="span10">
-            <div class="board">
+            <div class="board" >
                 <div id="list-list" class="row-fluid">
                 </div>
             </div>
@@ -99,8 +99,10 @@
 {% block scripts %}
     {{ super() }}
     <script type="text/template" id="list-template">
+        <div class="header">
         <span class="name"><%= name %></span>
         <a href="#" class="close" onclick="delete_list('/api/boards/{{ boardid }}/lists/<%= id %>/'); return false;">&times;</a>
+        </div>
     </script>
 
     <!-- doubleclick list name update -->
@@ -136,6 +138,77 @@
         }
     </script>
 
+    <!-- list drag and drop -->
+    <script type="text/javascript">
+        function swap_lists(obj1, obj2) {
+            if (obj1[0].offsetLeft < obj2[0].offsetLeft) {
+                obj1.detach();
+                obj1.insertAfter(obj2);
+            } else {
+                obj1.detach();
+                obj1.insertBefore(obj2);
+            }
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            // Change model order attr and update
+            $(".list").each(function(i, l) {
+                var obj = $(l);
+                var view = _.find(views, function(v) { return v.model.id === obj.attr("id") });
+
+                var url = '/api/boards/{{ boardid }}/lists/'+view.model.id+'/';
+                var token = $("#csrf_token").val();
+                var data = {'_csrf_token': token, 'order': i};
+                var req = $.ajax({url:url, data:data, type:"PUT"});
+                req.done(function(data) {
+                    ftask_update_csrf();
+                });
+                req.fail(function(data) {
+                    ftask_update_csrf();
+                });
+            });
+
+            return false;
+        }
+
+        function handleDragStart(e) {
+            $(this).css("opacity", 0.4);
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', $(this).attr("id"));
+            return true;
+        }
+
+        function handleDragEnd(e) {
+            $(this).css("opacity", 1);
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            var dragObj = $("#" + e.dataTransfer.getData('text/html'));
+            if ($(this).attr("id") != dragObj.attr("id")) {
+                swap_lists(dragObj, $(this));
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return true;
+        }
+
+        function make_draggable(el) {
+            el.attr("draggable", "true");
+            var e = document.getElementById(el.attr("id"));
+            e.addEventListener('dragstart', handleDragStart, false);
+            e.addEventListener('dragend', handleDragEnd, false);
+            e.addEventListener('dragover', handleDragOver, false);
+            e.addEventListener('dragover', handleDragOver, false);
+            e.addEventListener('drop', handleDrop, false);
+        }
+    </script>
+
     <!-- backbone base -->
     <script type="text/javascript">
         var List = Backbone.Model.extend({
@@ -147,6 +220,7 @@
                 var models = new Array();
                 for (var i=0; i<response.meta.total; i++) {
                     var model = new List(response.objects[i]);
+                    model.on("change:order", update_order);
                     models.push(model);
                 }
                 return models;
@@ -182,7 +256,11 @@
         var views = new Array();
         ls.on("add", function(l) {
             var view = new ListView({model: l});
-            $("#list-list").append(view.render().el);
+            var el = $(view.render().el);
+            el.attr("id", l.id);
+            $("#list-list").append(el);
+
+            make_draggable(el);
             views.push(view);
         });
         ls.on("remove", function(l) {
@@ -225,6 +303,23 @@
             req.fail(function(data) {
                 alert("ERROR");
                 ftask_update_csrf();
+            });
+        }
+
+        function update_order(model, neworder) {
+            reorder_lists();
+        }
+
+        function reorder_lists() {
+            views = _.sortBy(views, function(v) {
+                return v.model.get("order");
+            });
+
+            $("#list-list").empty();
+            _.each(views, function(v) {
+                var el = $(v.render().el);
+                el.attr("id", v.model.id);
+                $("#list-list").append(el);
             });
         }
 

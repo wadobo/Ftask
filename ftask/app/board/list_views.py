@@ -33,6 +33,7 @@ def view_board_lists(boardid):
     ls = b.get('lists', [])
     meta = {}
     meta['total'] = len(ls)
+    ls.sort(key=lambda x: x.get('order', 0))
 
     return jsonify(meta=meta,
                    objects=ls)
@@ -77,7 +78,8 @@ def update_board_list(board, lid, user, newdata):
 
     for l in board.get('lists', []):
         if l['id'] == lid:
-            l['name'] = newdata['name']
+            for k, v in newdata.items():
+                l[k] = v
 
     get_db().boards.save(board)
 
@@ -100,11 +102,14 @@ def delete_board_list(board, lid, user):
 
 
 def add_list(board, name):
-    ls = {'name': name, 'id': ObjectId().binary.encode("hex")}
+    ls = {'name': name,
+          'id': ObjectId().binary.encode("hex")}
 
     # not with the same name
-    for l in board.get('lists', []):
+    lists = board.get('lists', [])
+    for l in lists:
         if name == l['name']:
             raise abort(400)
 
+    ls['order'] = len(lists)
     board['lists'] = board.get('lists', []) + [ls]

@@ -82,6 +82,7 @@ class BoardTestCase(BaseTestCase):
         self.login('danigm', '123')
         res = self.get('/', status=200, tojson=True)
         board = res.json['objects'][0]
+        self.assertEqual(res.json['meta']['total'], 10)
 
         res = self.delete('/%s/' % board['id'], status=200, tojson=True)
 
