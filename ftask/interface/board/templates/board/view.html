@@ -140,6 +140,7 @@
 
     <!-- list drag and drop -->
     <script type="text/javascript">
+        var list_drag = null;
         function swap_lists(obj1, obj2) {
             if (obj1[0].offsetLeft < obj2[0].offsetLeft) {
                 obj1.detach();
@@ -178,6 +179,7 @@
         function handleDragStart(e) {
             $(this).css("opacity", 0.4);
             e.dataTransfer.effectAllowed = 'move';
+            list_drag = $(this).attr("id");
             e.dataTransfer.setData('text/html', $(this).attr("id"));
             return true;
         }
@@ -190,7 +192,7 @@
             if (e.preventDefault) {
                 e.preventDefault();
             }
-            var dragObj = $("#" + e.dataTransfer.getData('text/html'));
+            var dragObj = $("#" + list_drag);
             if ($(this).attr("id") != dragObj.attr("id")) {
                 swap_lists(dragObj, $(this));
             }
