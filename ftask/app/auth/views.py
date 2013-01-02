@@ -63,7 +63,7 @@ def auth_before_request():
         if request.method in ["POST", "PUT", "DELETE"]:
             token = session.pop('_csrf_token', None)
             if not token or token != request.values.get('_csrf_token'):
-                abort(400)
+                abort(403)
 
 
 @auth.route('/')

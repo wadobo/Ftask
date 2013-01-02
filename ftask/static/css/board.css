@@ -20,3 +20,28 @@
     color: #aaa;
     padding-left: 10px;
 }
+
+.board-buttons button {
+    width: 150px;
+    margin-bottom: 10px;
+}
+
+.board {
+    background-color: #393939;
+    height: 100%;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.list {
+    background-color: white;
+    height: 100%;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    padding: 10px;
+
+    margin-bottom: 10px;
+}

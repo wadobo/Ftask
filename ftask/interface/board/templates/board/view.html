@@ -2,40 +2,90 @@
 
 {% block title %}Board View{% endblock %}
 
-{% block header %}
-    <h1>Ftask board view <span class="boardname"></span></h1>
+{% block prehead %}
+{% include "navbar.html" %}
 {% endblock %}
 
-{% block content %}
+{% block precontainer %}
 {{ csrf_token()|safe }}
 
-<form method="POST" id="list-form" data-url="{{ url_for('board.new_list', boardid=boardid) }}">
-    <input type="text" id="listname" name="name" placeholder="list name"/>
-    <input type="submit" value="Add"/>
-</form>
+<!-- new list modal dialog -->
+<div id="modal" class="modal hide fade">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>New List</h3>
+    </div>
+    <div class="modal-body">
+        <form method="POST" id="list-form" class="form-horizontal" data-url="{{ url_for('board.new_list', boardid=boardid) }}">
+        <div class="control-group">
+            <label class="control-label" for="listname">List name</label>
+            <div class="controls">
+                <input type="text" id="listname" name="name" placeholder="list name"/>
+                <button class="btn btn-info">Add</button>
+            </div>
+        </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+    </div>
+</div>
 
-<ul id="list-list">
-</ul>
+
+<div class="board-container container">
+    <div class="row">
+        <!-- header -->
+        <div class="span12">
+            <h4><span class="boardname"></span></h4>
+        </div>
+
+        <!-- board -->
+        <div class="span10">
+            <div class="board">
+                <div id="list-list" class="row-fluid">
+                </div>
+            </div>
+        </div>
+
+        <!-- right menu -->
+        <div class="span2">
+            <h4>Members</h4>
+                <ul class="inline">
+                    <li><span class="gravatar-mini" data-email="{{ g.user['email'] }}"></span></li>
+                </ul>
+                <div class="board-buttons">
+                <button class="btn"><i class="icon-user"></i> Add Members</button>
+                </div>
+            <h4>Board</h4>
+                <div class="board-buttons">
+                <button class="btn" data-toggle="modal" data-target="#modal"><i class="icon-list"></i> Add List</button>
+                <button class="btn"><i class="icon-wrench"></i> Options</button>
+                </div>
+            <h4>Activity</h4>
+        </div>
+
+    </div><!-- row -->
+</div><!-- container -->
+
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
     <script type="text/template" id="list-template">
         <%= name %>
-        <a href="#" onclick="delete_list('/api/boards/{{ boardid }}/lists/<%= id %>/'); return false;">x</a>
+        <a href="#" class="close" onclick="delete_list('/api/boards/{{ boardid }}/lists/<%= id %>/'); return false;">&times;</a>
     </script>
 
     <script type="text/javascript">
-        var List = Backbone.Model.extend({});
+        var List = Backbone.Model.extend({
+            idAttribute: "id"
+        });
         var Lists = Backbone.Collection.extend({
             model: List,
             parse: function(response) {
-                $("#list-list").empty();
                 var models = new Array();
                 for (var i=0; i<response.meta.total; i++) {
                     var model = new List(response.objects[i]);
-                    var view = new ListView({model: model});
-                    $("#list-list").append(view.render().el);
                     models.push(model);
                 }
                 return models;
@@ -44,7 +94,8 @@
         });
 
         var ListView = Backbone.View.extend({
-            tagName: "li",
+            tagName: "div",
+            className: "list span3",
             template: _.template($('#list-template').html()),
 
             initialize: function() {
@@ -62,7 +113,19 @@
 
     <script type="text/javascript">
         var ls = new Lists();
-        ls.fetch();
+        var views = new Array();
+        ls.on("add", function(l) {
+            var view = new ListView({model: l});
+            $("#list-list").append(view.render().el);
+            views.push(view);
+        });
+        ls.on("remove", function(l) {
+            var view = _.find(views, function(v) { return v.model === l});
+            view.remove();
+            views = _.filter(views, function(v) { return v.model != l });
+        });
+
+        ls.fetch({update: true});
 
         $.get('/api/boards/{{ boardid }}/', function(data) {
             $(".boardname").html(data.name);
@@ -74,16 +137,17 @@
                         alert("ERROR");
                    },
                    function(data) {
-                        ls.fetch();
+                        ls.fetch({update: true});
+                        $("#modal").modal("hide");
                    });
 
-        setInterval('ls.fetch()', 5000);
+        setInterval('ls.fetch({update: true})', 5000);
 
         function delete_list(url) {
             var token = $("#csrf_token").val();
             var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
             req.done(function(data) {
-                ls.fetch();
+                ls.fetch({update: true});
                 ftask_update_csrf();
             });
             req.fail(function(data) {
@@ -91,6 +155,9 @@
                 ftask_update_csrf();
             });
         }
+        $('.gravatar-mini').each(function() {
+            $(this).html($.gravatar($(this).data("email"), {'size': 30}));
+        });
     </script>
 
 {% endblock %}

@@ -46,7 +46,9 @@
     </script>
 
     <script type="text/javascript">
-        var Board = Backbone.Model.extend({});
+        var Board = Backbone.Model.extend({
+            idAttribute: "id"
+        });
         var Boards = Backbone.Collection.extend({
             model: Board,
             parse: function(response) {
@@ -82,24 +84,24 @@
 
     <script type="text/javascript">
         var boards = new Boards();
-        boards.fetch();
+        boards.fetch({update: true});
 
         ftask_form("#board-form",
                    function(data) {
                         alert("ERROR");
                    },
                    function(data) {
-                        boards.fetch();
+                        boards.fetch({update: true});
                         $("#modal").modal("hide");
                    });
 
-        setInterval('boards.fetch()', 5000);
+        setInterval('boards.fetch({update: true})', 5000);
 
         function delete_board(url) {
             var token = $("#csrf_token").val();
             var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
             req.done(function(data) {
-                boards.fetch();
+                boards.fetch({update: true});
                 ftask_update_csrf();
             });
             req.fail(function(data) {
