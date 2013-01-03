@@ -339,6 +339,7 @@
         function dragListHelper(e) {
             var helper = $(this).clone();
             helper.addClass("dragging");
+            helper.width($(this).width());
             return helper;
         }
 
