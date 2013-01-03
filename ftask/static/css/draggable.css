@@ -14,7 +14,22 @@
 }
 
 .dragging {
-    -webkit-transform: rotate(5deg);
-    -moz-transform: rotate(5deg);
-    transform: rotate(5deg);
+    -webkit-transform: rotate(2deg);
+    -moz-transform: rotate(2deg);
+    transform: rotate(2deg);
+    box-shadow: -2px 5px 10px #333333 !important;
+
+    width: 180px !important;
+    z-index: 1000;
+}
+
+.list.dragging-freeze {
+    background-color: #fff;
+    color: black;
+}
+
+.dragging-freeze {
+    opacity: 0.4;
+    background-color: #333;
+    color: #aaa;
 }

@@ -28,7 +28,6 @@
 
 .board {
     background-color: #393939;
-    height: 100%;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
@@ -36,14 +35,16 @@
 }
 
 .list {
-    background-color: white;
-    height: 100%;
+    background-color: #E3E3E3;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
     padding: 10px;
 
     margin-bottom: 10px;
+
+   border-bottom: 1px solid #404040;
+   border-top: 1px solid #FFFFFF;
 }
 
 .newcard {

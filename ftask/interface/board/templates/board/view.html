@@ -254,6 +254,104 @@
             e.addEventListener('dragover', handleDragOver, false);
             e.addEventListener('drop', handleDrop, false);
         }
+
+        // jquery-ui drag
+        function make_task_draggable(el) {
+            $(el).draggable({
+                containment: ".board",
+                cursor: "move",
+                start: dragTaskStart,
+                stop: dragTaskStop,
+                helper: dragTaskHelper
+            });
+
+            $(el).droppable({
+                over: dropTaskOver,
+            });
+        }
+
+        function make_list_draggable(el) {
+            $(el).draggable({
+                //containment: ".board",
+                cursor: "move",
+                start: dragListStart,
+                stop: dragListStop,
+                helper: dragListHelper
+            });
+        }
+
+        function make_list_droppable(el) {
+            $(el).droppable({
+                over: function(e, ui) {
+                    var o1 = ui.draggable;
+                    if (o1.hasClass("task")) {
+                        $(this).find(".cards").prepend(o1);
+                    } else {
+                        var o2 = $(this);
+                        if (o2.offset().left < o1.offset().left) {
+                            o1.insertBefore(o2);
+                        } else {
+                            o1.insertAfter(o2);
+                        }
+                    }
+                },
+                tolerance: "pointer"
+            });
+
+            $(el).find(".header").droppable({
+                over: function(e, ui) {
+                    var o1 = ui.draggable;
+                    if (o1.hasClass("task")) {
+                        $(this).parent().find(".cards").prepend(o1);
+                    }
+
+                }
+            });
+        }
+
+        // task drag functions
+        function dragTaskHelper(e) {
+            var helper = $(this).clone();
+            helper.addClass("dragging");
+            return helper;
+        }
+
+        function dragTaskStart(e, ui) {
+            $(this).addClass("dragging-freeze");
+        }
+
+        function dragTaskStop(e, ui) {
+            $(this).removeClass("dragging-freeze");
+            // TODO send data movement to server
+            // * Change task listid
+            // * Reorder this list
+        }
+
+        function dropTaskOver(e, ui) {
+            var o1 = ui.draggable;
+            var o2 = $(this);
+            if (o1.hasClass("task")) {
+                o1.insertAfter(o2);
+            }
+        }
+
+        // list drag function
+        function dragListHelper(e) {
+            var helper = $(this).clone();
+            helper.addClass("dragging");
+            return helper;
+        }
+
+        function dragListStart(e, ui) {
+            $(this).addClass("dragging-freeze");
+        }
+
+        function dragListStop(e, ui) {
+            $(this).removeClass("dragging-freeze");
+            // TODO send data movement to server
+            // * Change task listid
+            // * Reorder this list
+        }
     </script>
 
     <!-- backbone base -->
@@ -355,7 +453,9 @@
             var el = $(view.render().el);
             $("#list-list").append(el);
 
-            make_draggable(el);
+            //make_draggable(el);
+            make_list_draggable(el);
+            make_list_droppable(el);
             views.push(view);
 
             // task collection
@@ -366,7 +466,7 @@
                 var el = $(view.render().el);
                 $("#"+ t.get("listid") + " .cards").append(el);
 
-                //make_draggable(el);
+                make_task_draggable(el);
                 taskviews.push(view);
             });
             tc.on("remove", function(t) {
