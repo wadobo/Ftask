@@ -45,3 +45,52 @@
 
     margin-bottom: 10px;
 }
+
+.newcard {
+    padding: 5px;
+    margin: -10px;
+    margin-top: 10px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.newcard:hover {
+    color: #393939;
+    cursor: pointer;
+    text-decoration: underline;
+    background-color: #eee;
+}
+
+.description textarea {
+    width: 100%;
+    padding: 0px;
+}
+
+.task {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #FFFFFF;
+    border-color: #B9B9B9 #B9B9B9 #939393;
+    border-image: none;
+    border-radius: 3px 3px 3px 3px;
+    border-style: solid;
+    border-width: 1px;
+    cursor: pointer;
+    margin-bottom: 4px;
+    min-height: 18px;
+    padding: 6px 8px 1px;
+    position: relative;
+    transition-duration: 0.2s, 0.1s, 0.2s;
+    transition-property: background, margin-bottom, opacity;
+    transition-timing-function: ease-out;
+    z-index: 0;
+}
+
+.task:hover {
+    border-color: #393939;
+    box-shadow: 0 0 4px #393939;
+    background-color: #eee;
+}

@@ -100,15 +100,60 @@
     {{ super() }}
     <script type="text/template" id="list-template">
         <div class="header">
-        <span class="name"><%= name %></span>
+        <span class="name"><%- name %></span>
         <a href="#" class="close" onclick="delete_list('/api/boards/{{ boardid }}/lists/<%= id %>/'); return false;">&times;</a>
         </div>
+        <div class="cards"></div>
+        <div class="newcardform"></div>
+        <div class="newcard muted">Add a card...</div>
+    </script>
+
+    <script type="text/template" id="task-template">
+        <span class="description"><%- description %></span>
+    </script>
+
+    <!-- new task form -->
+    <script type="text/template" id="new-task-template">
+        <form method="POST" data-url="/api/boards/{{ boardid }}/lists/<%= id %>/tasks/new/" class="form">
+            <div class="description">
+            <textarea name="description"></textarea>
+            </div>
+            <input class="btn btn-info" type="submit" value="Add"/>
+            <a href="#" class="close">&times;</a>
+        </form>
+    </script>
+    <script type="text/javascript">
+        function task_new_card_form(p, obj) {
+            if (p.find("#task-"+obj.id).length > 0) {
+                p.find("textarea").focus();
+                return;
+            }
+
+            var template = _.template($('#new-task-template').html());
+            var tmpl = template({id: obj.get('id')});
+            p.prepend(tmpl);
+            p.find("form").attr("id", "task-"+obj.id);
+            p.find(".close").click(function() {
+                $(this).parent().remove();
+            });
+
+            p.find("textarea").focus();
+
+            ftask_form("#task-"+obj.id,
+                       function(data) {
+                            alert("ERROR");
+                       },
+                       function(data) {
+                            $("#task-"+obj.id).remove();
+                            sync();
+                       });
+        }
     </script>
 
     <!-- doubleclick list name update -->
     <script type="text/template" id="edit-listname-template">
         <form method="PUT" data-url="/api/boards/{{ boardid }}/lists/<%= id %>/" class="form-horizontal">
-            <input type="text" name="name" value="<%= name %>" class="input-small"/>
+            <input type="text" name="name" value="<%- name %>" class="input-small"/>
             <input class="btn btn-info" type="submit" value="Save"/>
             <a href="#" class="close">&times;</a>
         </form>
@@ -133,7 +178,7 @@
                        },
                        function(data) {
                             $(this).remove();
-                            ls.fetch({update: true});
+                            sync();
                        });
         }
     </script>
@@ -246,6 +291,53 @@
                 this.$el.find(".name").dblclick(function() {
                     show_form($(this), model);
                 });
+                this.$el.find(".newcard").click(function() {
+                    task_new_card_form($(this).prev(), model);
+                });
+                this.$el.attr("id", model.id);
+
+                return this;
+            },
+
+        });
+    </script>
+
+    <!-- backbone task base -->
+    <script type="text/javascript">
+        var Task = Backbone.Model.extend({
+            idAttribute: "id"
+        });
+        var Tasks = Backbone.Collection.extend({
+            model: Task,
+            parse: function(response) {
+                var models = new Array();
+                for (var i=0; i<response.meta.total; i++) {
+                    var model = new List(response.objects[i]);
+                    model.on("change:order", task_update_order);
+                    models.push(model);
+                }
+                return models;
+            },
+            url: function() {
+                return '/api/boards/{{ boardid }}/lists/' + this.lurl + '/tasks/';
+            }
+        });
+
+        var TaskView = Backbone.View.extend({
+            tagName: "div",
+            className: "task",
+            template: _.template($('#task-template').html()),
+
+            initialize: function() {
+                this.listenTo(this.model, 'change', this.render);
+                this.listenTo(this.model, 'destroy', this.remove);
+            },
+
+            render: function() {
+                this.$el.html(this.template(this.model.toJSON()));
+                var model = this.model;
+                this.$el.attr("id", model.id);
+
                 return this;
             },
 
@@ -256,19 +348,48 @@
     <script type="text/javascript">
         var ls = new Lists();
         var views = new Array();
+        var taskviews = new Array();
+        var taskcollections = new Array();
         ls.on("add", function(l) {
             var view = new ListView({model: l});
             var el = $(view.render().el);
-            el.attr("id", l.id);
             $("#list-list").append(el);
 
             make_draggable(el);
             views.push(view);
+
+            // task collection
+            var tc = new Tasks();
+            tc.lurl = l.id;
+            tc.on("add", function(t) {
+                var view = new TaskView({model: t});
+                var el = $(view.render().el);
+                $("#"+ t.get("listid") + " .cards").append(el);
+
+                //make_draggable(el);
+                taskviews.push(view);
+            });
+            tc.on("remove", function(t) {
+                var view = _.find(taskviews, function(v) { return v.model === t});
+                view.remove();
+                taskviews = _.filter(taskviews, function(v) { return v.model != t });
+            });
+            taskcollections.push(tc);
+            tc.fetch({update: true});
         });
         ls.on("remove", function(l) {
             var view = _.find(views, function(v) { return v.model === l});
             view.remove();
             views = _.filter(views, function(v) { return v.model != l });
+            // removing task view
+            var tv = _.find(taskviews, function(tv) { return tv.model.get("listid") === l.id });
+            tv.remove();
+            taskviews = _.filter(taskviews, function(tv) { return tv.model.get("listid") != l.id });
+            // removing task collection
+            var tc = _.find(taskcollections, function(tc) { return tc.lurl === l.id });
+            tc.remove();
+            taskcollections = _.filter(taskcollections, function(tc) { return tc.lurl != l.id });
+
         });
 
         ls.fetch({update: true});
@@ -293,7 +414,7 @@
                         update_board();
                    });
 
-        setInterval('ls.fetch({update: true})', 5000);
+        setInterval('sync()', 5000);
 
         function delete_list(url) {
             var token = $("#csrf_token").val();
@@ -312,6 +433,10 @@
             reorder_lists();
         }
 
+        function task_update_order(model, neworder) {
+            //reorder_lists();
+        }
+
         function reorder_lists() {
             views = _.sortBy(views, function(v) {
                 return v.model.get("order");
@@ -322,6 +447,11 @@
                 var el = $(v.render().el);
                 el.attr("id", v.model.id);
                 $("#list-list").append(el);
+            });
+
+            _.each(taskviews, function(tv) {
+                var el = $(tv.render().el);
+                $("#"+ tv.model.get("listid") + " .cards").append(el);
             });
         }
 
@@ -335,6 +465,13 @@
         $('.gravatar-mini').each(function() {
             $(this).html($.gravatar($(this).data("email"), {'size': 30}));
         });
+
+        function sync() {
+            ls.fetch({update: true});
+            _.each(taskcollections, function(tc) {
+                tc.fetch({update: true});
+            });
+        }
     </script>
 
 {% endblock %}

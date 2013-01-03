@@ -30,7 +30,7 @@ from bson.objectid import ObjectId
 @authenticated
 def view_board_tasks(boardid):
     c = get_db().tasks
-    t = c.find({'boardid': boardid})
+    t = c.find({'boardid': boardid}).sort({'order': 1})
     meta = {}
     meta['total'] = t.count()
     objs = [to_json(i) for i in t]
@@ -57,11 +57,13 @@ view_list_tasks.path = '/<boardid>/lists/<listid>/tasks/'
 def new_list_task(boardid, listid):
     c = get_db().tasks
     description = request.form['description']
+    order = c.find({'boardid': boardid, 'listid': listid}).count()
 
     t = {
         'boardid': boardid,
         'listid': listid,
         'description': description,
+        'order': order,
     }
 
     c.insert(t)
@@ -107,10 +109,11 @@ def task_list(t):
 
 
 def update_task(task, user, newdata):
-    task['description'] = newdata['description']
+    for k, v in newdata.items():
+        task[k] = v
 
     get_db().tasks.save(task)
 
 
 def delete_task(task, user):
-    get_db().tasks.remove(task)
+    get_db().tasks.remove({'_id': task['_id']})

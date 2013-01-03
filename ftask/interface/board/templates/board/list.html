@@ -41,7 +41,7 @@
 {% block scripts %}
     {{ super() }}
     <script type="text/template" id="board-template">
-        <a href="/board/<%= id %>"><%= name %></a>
+        <a href="/board/<%= id %>"><%- name %></a>
         <a href="#" class="close" onclick="delete_board('/api/boards/<%= id %>/'); return false;">&times;</a>
     </script>
 

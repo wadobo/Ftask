@@ -98,6 +98,9 @@ def delete_board_list(board, lid, user):
         ls = board.get('lists', [])
         ls.pop(index)
 
+
+    # deleting associated tasks
+    get_db().tasks.remove({'listid': lid})
     get_db().boards.save(board)
 
 
