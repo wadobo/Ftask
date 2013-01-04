@@ -77,6 +77,18 @@ def list_users():
                    objects=objs)
 
 
+@auth.route('/find/')
+def find_users():
+    q = request.args.get('q', '')
+    users = get_db().users.find({'$or': [{'username': {'$regex': q}}, {'email': {'$regex': q}}]})
+    meta = {}
+    meta['total'] = users.count()
+    objs = [to_json(i, excludes=['password']) for i in users]
+
+    return jsonify(meta=meta,
+                   objects=objs)
+
+
 @auth.route('/register/', methods=['POST'])
 def register():
     c = get_db().users
