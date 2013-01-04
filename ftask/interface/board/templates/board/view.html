@@ -253,9 +253,6 @@
 
         function dragTaskStop(e, ui) {
             $(this).removeClass("dragging-freeze");
-            // TODO send data movement to server
-            // * Change task listid
-            // * Reorder this list
 
             // Change model order attr and update
             var list = $(this).parent().parent();
@@ -264,7 +261,7 @@
                 var obj = $(l);
                 if (!obj.hasClass("dragging")) {
                     var view = _.find(taskviews, function(v) { return v.model.id === obj.attr("id") });
-                    view.model.set({"order": i}, {silent: true});
+                    view.model.set({"order": i, "listid": list.attr("id")}, {silent: true});
                     view.$el.data("order", i);
 
                     var url = '/api/boards/{{ boardid }}/lists/'+list.attr("id")+'/tasks/'+view.model.id+'/';
@@ -411,6 +408,7 @@
             initialize: function() {
                 this.listenTo(this.model, 'change:description', this.description_changed);
                 this.listenTo(this.model, 'change:order', this.order_changed);
+                //this.listenTo(this.model, 'change:listid', this.order_changed);
                 this.listenTo(this.model, 'destroy', this.remove);
             },
 
@@ -531,7 +529,8 @@
         function update_task_order(lid) {
             var obj = $("#"+ lid + " .task");
             var sorted_tasks = obj.sort(function(a, b) { return $(a).data("order") < $(b).data("order") ? -1 : 1 });
-            $("#"+ lid + ".cards").append(sorted_tasks);
+            var cards = $("#"+ lid + " .cards");
+            cards.append(sorted_tasks);
         }
 
         function update_board() {
