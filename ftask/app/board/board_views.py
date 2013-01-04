@@ -85,6 +85,8 @@ def view_board(boardid):
     b = get_board_by_id(boardid)
 
     if request.method == 'GET':
+        s = b.get('shared', [])
+        b['shared'] = [to_json(u, excludes=['password']) for u in get_db().users.find({"username": {"$in": s}})]
         return jsonify(to_json(b))
     elif request.method == 'PUT':
         update_board(b, g.user, request.form)
@@ -113,6 +115,23 @@ def share_board(boardid):
     return jsonify(status="success")
 share_board.path = '/<boardid>/share/'
 share_board.methods = ['POST']
+
+
+@authenticated
+@can_view_board
+def unshare_board(boardid):
+    b = get_board_by_id(boardid)
+
+    # not with the same name
+    user = request.form['user']
+    l = b.get('shared', [])
+    l.remove(user)
+    b['shared'] = l
+    get_db().boards.save(b)
+
+    return jsonify(status="success")
+unshare_board.path = '/<boardid>/unshare/'
+unshare_board.methods = ['POST']
 
 
 # utils #

@@ -111,3 +111,12 @@ class BoardTestCase(BaseTestCase):
         res = self.get('/%s/' % board['id'], status=200, tojson=True)
         self.assertEqual(res.json['name'], board['name'])
         self.logout()
+
+        self.login('danigm', '123')
+        data = {'user': 'user1'}
+        res = self.post('/%s/unshare/' % board['id'], data=data, status=200, tojson=True)
+        self.logout()
+
+        self.login('user1', '123')
+        res = self.get('/%s/' % board['id'], status=401)
+        self.logout()

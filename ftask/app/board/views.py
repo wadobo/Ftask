@@ -29,11 +29,13 @@ from .board_views import list_boards
 from .board_views import view_board
 from .board_views import new_board
 from .board_views import share_board
+from .board_views import unshare_board
 
 board.add_url_rule(list_boards.path, 'boards', list_boards)
 board.add_url_rule(new_board.path, 'new_board', new_board)
 board.add_url_rule(view_board.path, 'view_board', view_board)
 board.add_url_rule(share_board.path, 'share_board', share_board)
+board.add_url_rule(unshare_board.path, 'unshare_board', unshare_board)
 
 ###############
 # BOARD LISTS #
