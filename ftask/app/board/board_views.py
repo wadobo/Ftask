@@ -25,6 +25,21 @@ from ..db import get_db, to_json
 from ..auth.decorators import authenticated
 
 from bson.objectid import ObjectId
+from functools import wraps
+
+
+def can_view_board(view):
+    @wraps(view)
+    def deco_view(boardid, *args, **kwargs):
+        board = get_board_by_id(boardid)
+        is_creator = board['user'] == g.user['username']
+        can_view = g.user['username'] in board.get('shared', [])
+        if not is_creator and not can_view:
+            raise abort(401)
+
+        return view(boardid, *args, **kwargs)
+
+    return deco_view
 
 
 @authenticated
@@ -65,8 +80,10 @@ new_board.methods = ['POST']
 
 
 @authenticated
+@can_view_board
 def view_board(boardid):
     b = get_board_by_id(boardid)
+
     if request.method == 'GET':
         return jsonify(to_json(b))
     elif request.method == 'PUT':
@@ -79,27 +96,39 @@ view_board.path = '/<boardid>/'
 view_board.methods = ['GET', 'PUT', 'DELETE']
 
 
+@authenticated
+@can_view_board
+def share_board(boardid):
+    b = get_board_by_id(boardid)
+
+    # not with the same name
+    user = request.form['user']
+    shared = b.get('shared', [])
+    if user in shared:
+        return jsonify(status="success")
+
+    b['shared'] = b.get('shared', []) + [user]
+    get_db().boards.save(b)
+
+    return jsonify(status="success")
+share_board.path = '/<boardid>/share/'
+share_board.methods = ['POST']
+
+
 # utils #
 
 def update_board(board, user, newdata):
-    if not board['user'] == user['username']:
-        raise abort(401)
-
     board['name'] = newdata['name']
     get_db().boards.save(board)
 
 
 def delete_board(board, user):
-    if not board['user'] == user['username']:
-        raise abort(401)
-
     get_db().boards.remove({'_id': board['_id']})
 
 
 def get_board_by_id(boardid):
     c = get_db().boards
-    b = c.find_one({'_id': ObjectId(boardid),
-                    'user': g.user['username']})
+    b = c.find_one({'_id': ObjectId(boardid)})
 
     if not b:
         raise abort(404)

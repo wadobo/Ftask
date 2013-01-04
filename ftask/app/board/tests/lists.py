@@ -109,3 +109,6 @@ class ListsTestCase(BoardTestCase):
 
         res = self.get('/', status=200, tojson=True)
         self.assertEqual(res.json['meta']['total'], 12)
+
+    def test_shared(self):
+        pass

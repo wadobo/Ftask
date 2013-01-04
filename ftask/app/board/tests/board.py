@@ -60,7 +60,7 @@ class BoardTestCase(BaseTestCase):
 
         res = self.get('/%s/' % board['id'], status=401)
         self.login('user1', '123')
-        res = self.get('/%s/' % board['id'], status=404)
+        res = self.get('/%s/' % board['id'], status=401)
         self.logout()
 
     def test_update(self):
@@ -88,3 +88,26 @@ class BoardTestCase(BaseTestCase):
 
         res = self.get('/', status=200, tojson=True)
         self.assertEqual(res.json['meta']['total'], 9)
+
+    def test_shared(self):
+        self.add_test_data()
+
+        self.login('danigm', '123')
+        res = self.get('/', status=200, tojson=True)
+        board = res.json['objects'][0]
+        self.assertEqual(res.json['meta']['total'], 10)
+        self.logout()
+
+        self.login('user1', '123')
+        res = self.get('/%s/' % board['id'], status=401)
+        self.logout()
+
+        self.login('danigm', '123')
+        data = {'user': 'user1'}
+        res = self.post('/%s/share/' % board['id'], data=data, status=200, tojson=True)
+        self.logout()
+
+        self.login('user1', '123')
+        res = self.get('/%s/' % board['id'], status=200, tojson=True)
+        self.assertEqual(res.json['name'], board['name'])
+        self.logout()
