@@ -183,78 +183,8 @@
         }
     </script>
 
-    <!-- list drag and drop -->
+    <!-- drag and drop -->
     <script type="text/javascript">
-        var list_drag = null;
-        function swap_lists(obj1, obj2) {
-            if (obj1[0].offsetLeft < obj2[0].offsetLeft) {
-                obj1.detach();
-                obj1.insertAfter(obj2);
-            } else {
-                obj1.detach();
-                obj1.insertBefore(obj2);
-            }
-        }
-
-        function handleDrop(e) {
-            if (e.stopPropagation) {
-                e.stopPropagation();
-            }
-
-            // Change model order attr and update
-            $(".list").each(function(i, l) {
-                var obj = $(l);
-                var view = _.find(views, function(v) { return v.model.id === obj.attr("id") });
-
-                var url = '/api/boards/{{ boardid }}/lists/'+view.model.id+'/';
-                var token = $("#csrf_token").val();
-                var data = {'_csrf_token': token, 'order': i};
-                var req = $.ajax({url:url, data:data, type:"PUT"});
-                req.done(function(data) {
-                    ftask_update_csrf();
-                });
-                req.fail(function(data) {
-                    ftask_update_csrf();
-                });
-            });
-
-            return false;
-        }
-
-        function handleDragStart(e) {
-            $(this).css("opacity", 0.4);
-            e.dataTransfer.effectAllowed = 'move';
-            list_drag = $(this).attr("id");
-            e.dataTransfer.setData('text/html', $(this).attr("id"));
-            return true;
-        }
-
-        function handleDragEnd(e) {
-            $(this).css("opacity", 1);
-        }
-
-        function handleDragOver(e) {
-            if (e.preventDefault) {
-                e.preventDefault();
-            }
-            var dragObj = $("#" + list_drag);
-            if ($(this).attr("id") != dragObj.attr("id")) {
-                swap_lists(dragObj, $(this));
-            }
-            e.dataTransfer.dropEffect = 'move';
-            return true;
-        }
-
-        function make_draggable(el) {
-            el.attr("draggable", "true");
-            var e = document.getElementById(el.attr("id"));
-            e.addEventListener('dragstart', handleDragStart, false);
-            e.addEventListener('dragend', handleDragEnd, false);
-            e.addEventListener('dragover', handleDragOver, false);
-            e.addEventListener('dragover', handleDragOver, false);
-            e.addEventListener('drop', handleDrop, false);
-        }
-
         // jquery-ui drag
         function make_task_draggable(el) {
             $(el).draggable({
@@ -313,6 +243,7 @@
         function dragTaskHelper(e) {
             var helper = $(this).clone();
             helper.addClass("dragging");
+            helper.width($(this).width());
             return helper;
         }
 
@@ -325,6 +256,29 @@
             // TODO send data movement to server
             // * Change task listid
             // * Reorder this list
+
+            // Change model order attr and update
+            var list = $(this).parent().parent();
+            var tasks = list.find(".task");
+            tasks.each(function(i, l) {
+                var obj = $(l);
+                if (!obj.hasClass("dragging")) {
+                    var view = _.find(taskviews, function(v) { return v.model.id === obj.attr("id") });
+                    view.model.set({"order": i}, {silent: true});
+                    view.$el.data("order", i);
+
+                    var url = '/api/boards/{{ boardid }}/lists/'+list.attr("id")+'/tasks/'+view.model.id+'/';
+                    var token = $("#csrf_token").val();
+                    var data = {'_csrf_token': token, 'order': i, 'listid': list.attr("id")};
+                    var req = $.ajax({url:url, data:data, type:"PUT"});
+                    req.done(function(data) {
+                        ftask_update_csrf();
+                    });
+                    req.fail(function(data) {
+                        ftask_update_csrf();
+                    });
+                }
+            });
         }
 
         function dropTaskOver(e, ui) {
@@ -349,9 +303,27 @@
 
         function dragListStop(e, ui) {
             $(this).removeClass("dragging-freeze");
-            // TODO send data movement to server
-            // * Change task listid
-            // * Reorder this list
+
+            // Change model order attr and update
+            $(".list").each(function(i, l) {
+                var obj = $(l);
+                if (!obj.hasClass("dragging")) {
+                    var view = _.find(views, function(v) { return v.model.id === obj.attr("id") });
+                    view.model.set({"order": i}, {silent: true});
+                    view.$el.data("order", i);
+
+                    var url = '/api/boards/{{ boardid }}/lists/'+view.model.id+'/';
+                    var token = $("#csrf_token").val();
+                    var data = {'_csrf_token': token, 'order': i};
+                    var req = $.ajax({url:url, data:data, type:"PUT"});
+                    req.done(function(data) {
+                        ftask_update_csrf();
+                    });
+                    req.fail(function(data) {
+                        ftask_update_csrf();
+                    });
+                }
+            });
         }
     </script>
 
@@ -366,7 +338,6 @@
                 var models = new Array();
                 for (var i=0; i<response.meta.total; i++) {
                     var model = new List(response.objects[i]);
-                    model.on("change:order", update_order);
                     models.push(model);
                 }
                 return models;
@@ -380,7 +351,8 @@
             template: _.template($('#list-template').html()),
 
             initialize: function() {
-                this.listenTo(this.model, 'change', this.render);
+                this.listenTo(this.model, 'change:name', this.name_changed);
+                this.listenTo(this.model, 'change:order', this.order_changed);
                 this.listenTo(this.model, 'destroy', this.remove);
             },
 
@@ -394,9 +366,19 @@
                     task_new_card_form($(this).prev(), model);
                 });
                 this.$el.attr("id", model.id);
+                this.$el.data("order", model.get("order"));
 
                 return this;
             },
+
+            name_changed: function() {
+                this.$el.find(".name").html(this.model.get("name"));
+            },
+
+            order_changed: function() {
+                this.$el.data("order", this.model.get("order"));
+                update_order();
+            }
 
         });
     </script>
@@ -412,7 +394,6 @@
                 var models = new Array();
                 for (var i=0; i<response.meta.total; i++) {
                     var model = new List(response.objects[i]);
-                    model.on("change:order", task_update_order);
                     models.push(model);
                 }
                 return models;
@@ -428,7 +409,8 @@
             template: _.template($('#task-template').html()),
 
             initialize: function() {
-                this.listenTo(this.model, 'change', this.render);
+                this.listenTo(this.model, 'change:description', this.description_changed);
+                this.listenTo(this.model, 'change:order', this.order_changed);
                 this.listenTo(this.model, 'destroy', this.remove);
             },
 
@@ -436,9 +418,20 @@
                 this.$el.html(this.template(this.model.toJSON()));
                 var model = this.model;
                 this.$el.attr("id", model.id);
+                this.$el.data("order", model.get("order"));
 
                 return this;
             },
+
+            description_changed: function() {
+                this.$el.find(".name").html(this.model.get("description"));
+            },
+
+            order_changed: function() {
+                this.$el.data("order", this.model.get("order"));
+                update_task_order(this.model.get("listid"));
+            }
+
 
         });
     </script>
@@ -452,11 +445,11 @@
         ls.on("add", function(l) {
             var view = new ListView({model: l});
             var el = $(view.render().el);
-            $("#list-list").append(el);
 
-            //make_draggable(el);
             make_list_draggable(el);
             make_list_droppable(el);
+            $("#list-list").append(el);
+
             views.push(view);
 
             // task collection
@@ -530,30 +523,15 @@
             });
         }
 
-        function update_order(model, neworder) {
-            reorder_lists();
+        function update_order() {
+            var sorted_list = $(".list").sort(function(a, b) { return $(a).data("order") < $(b).data("order") ? -1 : 1 });
+            $("#list-list").append(sorted_list);
         }
 
-        function task_update_order(model, neworder) {
-            //reorder_lists();
-        }
-
-        function reorder_lists() {
-            views = _.sortBy(views, function(v) {
-                return v.model.get("order");
-            });
-
-            $("#list-list").empty();
-            _.each(views, function(v) {
-                var el = $(v.render().el);
-                el.attr("id", v.model.id);
-                $("#list-list").append(el);
-            });
-
-            _.each(taskviews, function(tv) {
-                var el = $(tv.render().el);
-                $("#"+ tv.model.get("listid") + " .cards").append(el);
-            });
+        function update_task_order(lid) {
+            var obj = $("#"+ lid + " .task");
+            var sorted_tasks = obj.sort(function(a, b) { return $(a).data("order") < $(b).data("order") ? -1 : 1 });
+            $("#"+ lid + ".cards").append(sorted_tasks);
         }
 
         function update_board() {

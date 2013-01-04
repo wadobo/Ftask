@@ -27,7 +27,6 @@ function ftask_form(id, onerror, onsuccess) {
         var method = $(id).attr("method");
         data += "&_csrf_token="+$("#csrf_token").val();
 
-        // TODO loading
         $("#loading").fadeIn();
         var req = $.ajax({url:url, data:data, type:method});
 
