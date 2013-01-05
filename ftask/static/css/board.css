@@ -95,3 +95,16 @@
     box-shadow: 0 0 4px #393939;
     background-color: #eee;
 }
+
+.memberimg {
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
+.admin, .members {
+    display: inline;
+}
+
+.member-lists {
+    margin-bottom: 5px;
+}

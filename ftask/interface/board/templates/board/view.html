@@ -9,6 +9,24 @@
 {% block precontainer %}
 {{ csrf_token()|safe }}
 
+<!-- member name modal -->
+<div id="member-modal" class="modal hide fade">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Members</h3>
+    </div>
+    <div class="user">
+        <span class="gravatar"></span>
+        <span class="name"></span>
+    </div>
+    <div class="modal-body">
+        <form method="POST" id="share-form" class="form-horizontal" data-url="{{ url_for('board.share_board', boardid=boardid) }}">
+            <input type="text" id="sharedname" name="user" placeholder="user name"/>
+            <button class="btn btn-info">Add</button>
+        </form>
+    </div>
+</div>
+
 <!-- edit board name modal -->
 <div id="edit-board-modal" class="modal hide fade">
     <div class="modal-header">
@@ -77,11 +95,12 @@
         <!-- right menu -->
         <div class="span2">
             <h4>Members</h4>
-                <ul class="inline">
-                    <li><span class="gravatar-mini" data-email="{{ g.user['email'] }}"></span></li>
-                </ul>
+                <div class="member-lists">
+                    <ul class="inline admin"> </ul>
+                    <ul class="inline members"> </ul>
+                </div>
                 <div class="board-buttons">
-                <button class="btn"><i class="icon-user"></i> Add Members</button>
+                <button class="btn" data-toggle="modal" data-target="#member-modal"><i class="icon-user"></i> Add Members</button>
                 </div>
             <h4>Board</h4>
                 <div class="board-buttons">
@@ -98,6 +117,18 @@
 
 {% block scripts %}
     {{ super() }}
+    <script type="text/template" id="miniuser-template">
+        <li class="btn-group memberimg">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                <img src="<%=url%>" alt="<%-user%>" title="<%-user%>" />
+            </a>
+            <ul class="dropdown-menu">
+                <li> <img src="<%=url%>"> <%-user%> </li>
+                <li> <a href="#" onclick="unshare('<%-user%>'); return false;">Remove from board</a> </li>
+            </ul>
+        </li>
+    </script>
+
     <script type="text/template" id="list-template">
         <div class="header">
         <span class="name"><%- name %></span>
@@ -506,6 +537,15 @@
                         update_board();
                    });
 
+        ftask_form("#share-form",
+                   function(data) {
+                        alert("ERROR");
+                   },
+                   function(data) {
+                        $("#member-modal").modal("hide");
+                        update_board();
+                   });
+
         setInterval('sync()', 5000);
 
         function delete_list(url) {
@@ -517,6 +557,20 @@
             });
             req.fail(function(data) {
                 alert("ERROR");
+                ftask_update_csrf();
+            });
+        }
+
+        function unshare(username) {
+            var url = '/api/boards/{{ boardid }}/unshare/';
+            var token = $("#csrf_token").val();
+            var data = {'_csrf_token': token, 'user': username};
+            var req = $.ajax({url:url, data:data, type:"POST"});
+            req.done(function(data) {
+                ftask_update_csrf();
+                update_board();
+            });
+            req.fail(function(data) {
                 ftask_update_csrf();
             });
         }
@@ -537,6 +591,21 @@
             $.get('/api/boards/{{ boardid }}/', function(data) {
                 $(".boardname").html(data.name);
                 $("title").html($("title").html() + ' - ' + data.name);
+                $(".members").empty();
+                for (var i = 0; i < data.shared.length; i++) {
+                    var u = data.shared[i];
+                    var img = $.gravatar(u.email, {'size': 30});
+                    var template = _.template($('#miniuser-template').html());
+                    $(".members").append(template({user: u.username, url: img.attr("src")}));
+                }
+
+                $(".admin").empty();
+                for (var i = 0; i < data.admins.length; i++) {
+                    var u = data.admins[i];
+                    var img = $.gravatar(u.email, {'size': 30});
+                    var template = _.template($('#miniuser-template').html());
+                    $(".admin").append(template({user: u.username, url: img.attr("src")}));
+                }
             });
         }
 
@@ -550,6 +619,38 @@
                 tc.fetch({update: true});
             });
         }
+
+        $( "#sharedname" ).autocomplete({
+            source: function(req, response) {
+                $.get("/api/users/find/?q=" + req.term,
+                      function(data) {
+                        response( $.map( data.objects, function(item) {
+                            return {
+                                label: item.username,
+                                value: item.username,
+                                email: item.email
+                            }
+                        }));
+                      });
+            },
+            select: function( event, ui ) {
+                var img = $('<span class="gravatar-mini"></span>');
+                img.html($.gravatar(ui.item.email, {'size': 30}));
+
+                var div = $("#member-modal").find(".user");
+                div.find(".gravatar").html(img.html());
+                div.find(".name").html(ui.item.label);
+            }
+        }).data("autocomplete")._renderItem = function( ul, item ) {
+            var img = $('<span class="gravatar-mini"></span>');
+            img.html($.gravatar(item.email, {'size': 30}));
+            console.log(img.html());
+            return $( "<li>" )
+                .data( "item.autocomplete", item )
+                .append('<a>' + img.html() + item.label + "</a>" )
+                .appendTo(ul);
+        };
+
     </script>
 
 {% endblock %}

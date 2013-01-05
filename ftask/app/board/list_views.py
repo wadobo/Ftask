@@ -23,11 +23,13 @@ from flask import g
 from ..db import get_db
 from ..auth.decorators import authenticated
 from .board_views import get_board_by_id
+from .board_views import can_view_board
 
 from bson.objectid import ObjectId
 
 
 @authenticated
+@can_view_board
 def view_board_lists(boardid):
     b = get_board_by_id(boardid)
     ls = b.get('lists', [])
@@ -41,6 +43,7 @@ view_board_lists.path = '/<boardid>/lists/'
 
 
 @authenticated
+@can_view_board
 def new_board_list(boardid):
     c = get_db().boards
     b = get_board_by_id(boardid)
@@ -55,6 +58,7 @@ new_board_list.methods = ['POST']
 
 
 @authenticated
+@can_view_board
 def view_board_list(boardid, listid):
     b = get_board_by_id(boardid)
     if request.method == 'GET':
@@ -73,9 +77,6 @@ view_board_list.methods = ['GET', 'PUT', 'DELETE']
 
 
 def update_board_list(board, lid, user, newdata):
-    if not board['user'] == user['username']:
-        raise abort(401)
-
     for l in board.get('lists', []):
         if l['id'] == lid:
             for k, v in newdata.items():
@@ -85,9 +86,6 @@ def update_board_list(board, lid, user, newdata):
 
 
 def delete_board_list(board, lid, user):
-    if not board['user'] == user['username']:
-        raise abort(401)
-
     index = -1
     for i, l in enumerate(board.get('lists', [])):
         if l['id'] == lid:

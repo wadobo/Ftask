@@ -23,11 +23,13 @@ from flask import g
 from ..db import get_db, to_json
 from ..auth.decorators import authenticated
 from .board_views import get_board_by_id
+from .board_views import can_view_board
 
 from bson.objectid import ObjectId
 
 
 @authenticated
+@can_view_board
 def view_board_tasks(boardid):
     c = get_db().tasks
     t = c.find({'boardid': boardid}).sort([('order', 1)])
@@ -41,6 +43,7 @@ view_board_tasks.path = '/<boardid>/tasks/'
 
 
 @authenticated
+@can_view_board
 def view_list_tasks(boardid, listid):
     c = get_db().tasks
     t = c.find({'listid': listid}).sort([('order', 1)])
@@ -54,6 +57,7 @@ view_list_tasks.path = '/<boardid>/lists/<listid>/tasks/'
 
 
 @authenticated
+@can_view_board
 def new_list_task(boardid, listid):
     c = get_db().tasks
     description = request.form['description']
@@ -74,15 +78,14 @@ new_list_task.methods = ['POST']
 
 
 @authenticated
+@can_view_board
 def view_list_task(boardid, listid, taskid):
     c = get_db().tasks
-    t = c.find_one({'_id': ObjectId(taskid)})
-
-    b = task_board(t)
-    if not b['user'] == g.user['username']:
-        raise abort(404)
+    t = c.find_one({'boardid': boardid, '_id': ObjectId(taskid)})
 
     if request.method == 'GET':
+        if not t:
+            raise abort(404)
         return jsonify(to_json(t))
     elif request.method == 'PUT':
         update_task(t, g.user, request.form)

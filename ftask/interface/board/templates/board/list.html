@@ -36,6 +36,13 @@
 <ul id="board-list" class="unstyled bold-list">
 </ul>
 
+<div class="board-title">
+<h3>Shared with me</h3>
+</div>
+
+<ul id="shared-list" class="unstyled bold-list">
+</ul>
+
 {% endblock %}
 
 {% block scripts %}
@@ -77,6 +84,23 @@
             },
 
         });
+
+        // Shared boards backbone
+        var SharedBoard = Backbone.Model.extend({
+            idAttribute: "id"
+        });
+        var SharedBoards = Backbone.Collection.extend({
+            model: SharedBoard,
+            parse: function(response) {
+                var models = new Array();
+                for (var i=0; i<response.meta.total; i++) {
+                    var model = new SharedBoard(response.objects[i]);
+                    models.push(model);
+                }
+                return models;
+            },
+            url: '/api/boards/shared/'
+        });
     </script>
 
     <script type="text/javascript">
@@ -95,6 +119,22 @@
 
         boards.fetch({update: true});
 
+        // shared boards
+        var sharedboards = new SharedBoards();
+        var sharedviews = new Array();
+        sharedboards.on("add", function(l) {
+            var view = new BoardView({model: l});
+            $("#shared-list").append(view.render().el);
+            sharedviews.push(view);
+        });
+        sharedboards.on("remove", function(l) {
+            var view = _.find(sharedviews, function(v) { return v.model === l});
+            view.remove();
+            sharedviews = _.filter(sharedviews, function(v) { return v.model != l });
+        });
+
+        sharedboards.fetch({update: true});
+
         ftask_form("#board-form",
                    function(data) {
                         alert("ERROR");
@@ -105,6 +145,7 @@
                    });
 
         setInterval('boards.fetch({update: true})', 5000);
+        setInterval('sharedboards.fetch({update: true})', 5000);
 
         function delete_board(url) {
             var token = $("#csrf_token").val();

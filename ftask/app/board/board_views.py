@@ -55,6 +55,18 @@ list_boards.path = '/'
 
 
 @authenticated
+def shared_boards():
+    boards = get_db().boards.find({'shared': g.user['username']}).sort([('name', 1)])
+    meta = {}
+    meta['total'] = boards.count()
+    objs = [to_json(i) for i in boards]
+
+    return jsonify(meta=meta,
+                   objects=objs)
+shared_boards.path = '/shared/'
+
+
+@authenticated
 def new_board():
     c = get_db().boards
     name = request.form['name']
@@ -87,6 +99,7 @@ def view_board(boardid):
     if request.method == 'GET':
         s = b.get('shared', [])
         b['shared'] = [to_json(u, excludes=['password']) for u in get_db().users.find({"username": {"$in": s}})]
+        b['admins'] = [to_json(u, excludes=['password']) for u in get_db().users.find({"username": b['user']})]
         return jsonify(to_json(b))
     elif request.method == 'PUT':
         update_board(b, g.user, request.form)
@@ -106,7 +119,7 @@ def share_board(boardid):
     # not with the same name
     user = request.form['user']
     shared = b.get('shared', [])
-    if user in shared:
+    if user in shared or user == b['user']:
         return jsonify(status="success")
 
     b['shared'] = b.get('shared', []) + [user]
