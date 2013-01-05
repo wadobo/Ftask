@@ -31,7 +31,7 @@
             return false;
         });
 
-        ftask_form("#logout-form", function(data) { alert("ERROR"); });
+        Ftask.form("#logout-form", function(data) { alert("ERROR"); });
         $('#gravatar-mini').html($.gravatar("{{ g.user['email'] }}", {'size': 30}));
     });
 </script>

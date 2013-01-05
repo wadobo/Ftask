@@ -135,7 +135,7 @@
 
         sharedboards.fetch({update: true});
 
-        ftask_form("#board-form",
+        Ftask.form("#board-form",
                    function(data) {
                         alert("ERROR");
                    },
@@ -152,11 +152,11 @@
             var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
             req.done(function(data) {
                 boards.fetch({update: true});
-                ftask_update_csrf();
+                Ftask.updateCsrf();
             });
             req.fail(function(data) {
                 alert("ERROR");
-                ftask_update_csrf();
+                Ftask.updateCsrf();
             });
         }
     </script>

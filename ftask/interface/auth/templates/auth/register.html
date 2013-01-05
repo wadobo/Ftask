@@ -15,7 +15,6 @@
     <div class="span4 offset4">
         <div class="well">
             <form method="POST" class="form" id="register-form" data-url="{{ url_for('auth.register') }}" data-next="{{ url_for('authi.login') }}">
-                {{ csrf_token()|safe }}
                 <div class="control-group">
                     <label class="control-label" for="username">Username</label>
                     <div class="controls">
@@ -47,7 +46,7 @@
 {% block scripts %}
     {{ super() }}
     <script type="text/javascript">
-        ftask_form("#register-form",
+        Ftask.form("#register-form",
                    function(data) {
                         alert("ERROR");
                    });

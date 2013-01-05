@@ -170,7 +170,7 @@
 
             p.find("textarea").focus();
 
-            ftask_form("#task-"+obj.id,
+            Ftask.form("#task-"+obj.id,
                        function(data) {
                             alert("ERROR");
                        },
@@ -203,7 +203,7 @@
             });
             p.find("form").attr("id", "name-"+obj.id);
 
-            ftask_form("#name-"+obj.id,
+            Ftask.form("#name-"+obj.id,
                        function(data) {
                             alert("ERROR");
                        },
@@ -300,10 +300,10 @@
                     var data = {'_csrf_token': token, 'order': i, 'listid': list.attr("id")};
                     var req = $.ajax({url:url, data:data, type:"PUT"});
                     req.done(function(data) {
-                        ftask_update_csrf();
+                        Ftask.updateCsrf();
                     });
                     req.fail(function(data) {
-                        ftask_update_csrf();
+                        Ftask.updateCsrf();
                     });
                 }
             });
@@ -345,10 +345,10 @@
                     var data = {'_csrf_token': token, 'order': i};
                     var req = $.ajax({url:url, data:data, type:"PUT"});
                     req.done(function(data) {
-                        ftask_update_csrf();
+                        Ftask.updateCsrf();
                     });
                     req.fail(function(data) {
-                        ftask_update_csrf();
+                        Ftask.updateCsrf();
                     });
                 }
             });
@@ -519,7 +519,7 @@
 
         update_board();
 
-        ftask_form("#list-form",
+        Ftask.form("#list-form",
                    function(data) {
                         alert("ERROR");
                    },
@@ -528,7 +528,7 @@
                         $("#modal").modal("hide");
                    });
 
-        ftask_form("#board-form",
+        Ftask.form("#board-form",
                    function(data) {
                         alert("ERROR");
                    },
@@ -537,7 +537,7 @@
                         update_board();
                    });
 
-        ftask_form("#share-form",
+        Ftask.form("#share-form",
                    function(data) {
                         alert("ERROR");
                    },
@@ -553,11 +553,11 @@
             var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
             req.done(function(data) {
                 ls.fetch({update: true});
-                ftask_update_csrf();
+                Ftask.updateCsrf();
             });
             req.fail(function(data) {
                 alert("ERROR");
-                ftask_update_csrf();
+                Ftask.updateCsrf();
             });
         }
 
@@ -567,11 +567,11 @@
             var data = {'_csrf_token': token, 'user': username};
             var req = $.ajax({url:url, data:data, type:"POST"});
             req.done(function(data) {
-                ftask_update_csrf();
+                Ftask.updateCsrf();
                 update_board();
             });
             req.fail(function(data) {
-                ftask_update_csrf();
+                Ftask.updateCsrf();
             });
         }
 
