@@ -49,116 +49,13 @@
     {{ super() }}
     <script type="text/template" id="board-template">
         <a href="/board/<%= id %>"><%- name %></a>
-        <a href="#" class="close" onclick="delete_board('/api/boards/<%= id %>/'); return false;">&times;</a>
+        <a href="#" class="close">&times;</a>
     </script>
 
-    <script type="text/javascript">
-        var Board = Backbone.Model.extend({
-            idAttribute: "id"
-        });
-        var Boards = Backbone.Collection.extend({
-            model: Board,
-            parse: function(response) {
-                var models = new Array();
-                for (var i=0; i<response.meta.total; i++) {
-                    var model = new Board(response.objects[i]);
-                    models.push(model);
-                }
-                return models;
-            },
-            url: '/api/boards/'
-        });
-
-        var BoardView = Backbone.View.extend({
-            tagName: "li",
-            template: _.template($('#board-template').html()),
-
-            initialize: function() {
-                this.listenTo(this.model, 'change', this.render);
-                this.listenTo(this.model, 'destroy', this.remove);
-            },
-
-            render: function() {
-                this.$el.html(this.template(this.model.toJSON()));
-                return this;
-            },
-
-        });
-
-        // Shared boards backbone
-        var SharedBoard = Backbone.Model.extend({
-            idAttribute: "id"
-        });
-        var SharedBoards = Backbone.Collection.extend({
-            model: SharedBoard,
-            parse: function(response) {
-                var models = new Array();
-                for (var i=0; i<response.meta.total; i++) {
-                    var model = new SharedBoard(response.objects[i]);
-                    models.push(model);
-                }
-                return models;
-            },
-            url: '/api/boards/shared/'
-        });
-    </script>
+    <script type="text/javascript" src="{{ url_for('.static', filename='js/board-list.js') }}"></script>
 
     <script type="text/javascript">
-        var boards = new Boards();
-        var views = new Array();
-        boards.on("add", function(l) {
-            var view = new BoardView({model: l});
-            $("#board-list").append(view.render().el);
-            views.push(view);
-        });
-        boards.on("remove", function(l) {
-            var view = _.find(views, function(v) { return v.model === l});
-            view.remove();
-            views = _.filter(views, function(v) { return v.model != l });
-        });
-
-        boards.fetch({update: true});
-
-        // shared boards
-        var sharedboards = new SharedBoards();
-        var sharedviews = new Array();
-        sharedboards.on("add", function(l) {
-            var view = new BoardView({model: l});
-            $("#shared-list").append(view.render().el);
-            sharedviews.push(view);
-        });
-        sharedboards.on("remove", function(l) {
-            var view = _.find(sharedviews, function(v) { return v.model === l});
-            view.remove();
-            sharedviews = _.filter(sharedviews, function(v) { return v.model != l });
-        });
-
-        sharedboards.fetch({update: true});
-
-        Ftask.form("#board-form",
-                   function(data) {
-                        alert("ERROR");
-                   },
-                   function(data) {
-                        boards.fetch({update: true});
-                        $("#modal").modal("hide");
-                   });
-
-        setInterval('boards.fetch({update: true})', 5000);
-        setInterval('sharedboards.fetch({update: true})', 5000);
-
-        function delete_board(url) {
-            var token = $("#csrf_token").val();
-            var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
-            req.done(function(data) {
-                boards.fetch({update: true});
-                Ftask.updateCsrf();
-            });
-            req.fail(function(data) {
-                alert("ERROR");
-                Ftask.updateCsrf();
-            });
-        }
+        BoardList.initialize();
     </script>
 
 {% endblock %}
