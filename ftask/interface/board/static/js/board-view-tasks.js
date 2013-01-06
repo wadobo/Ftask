@@ -167,7 +167,7 @@
         tasks.each(function(i, l) {
             var obj = $(l);
             if (!obj.hasClass("dragging")) {
-                var view = _.find(Task.Views, function(v) { return v.model.id === obj.attr("id") });
+                var view = _.find(Task.views, function(v) { return v.model.id === obj.attr("id") });
                 view.model.set({"order": i, "listid": list.attr("id")}, {silent: true});
                 view.$el.data("order", i);
 
