@@ -124,7 +124,9 @@
             </a>
             <ul class="dropdown-menu">
                 <li> <img src="<%=url%>"> <%-user%> </li>
-                <li> <a href="#" onclick="unshare('<%-user%>'); return false;">Remove from board</a> </li>
+                <li class="remove">
+                    <a href="#" class="remove-user">Remove from board <i class="icon-remove"></i></a>
+                </li>
             </ul>
         </li>
     </script>
@@ -132,7 +134,7 @@
     <script type="text/template" id="list-template">
         <div class="header">
         <span class="name"><%- name %></span>
-        <a href="#" class="close" onclick="delete_list('/api/boards/{{ boardid }}/lists/<%= id %>/'); return false;">&times;</a>
+        <a href="#" class="close">&times;</a>
         </div>
         <div class="cards"></div>
         <div class="newcardform"></div>
@@ -164,320 +166,21 @@
     </script>
 
     <script type="text/javascript" src="{{ url_for('.static', filename='js/board-view.js') }}"></script>
+    <script type="text/javascript"> BoardView.boardId = "{{ boardid }}"; </script>
     <script type="text/javascript" src="{{ url_for('.static', filename='js/board-view-tasks.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('.static', filename='js/board-view-lists.js') }}"></script>
 
-    <!-- drag and drop -->
-    <script type="text/javascript">
-        // jquery-ui drag
-        function make_task_draggable(el) {
-            $(el).draggable({
-                containment: ".board",
-                cursor: "move",
-                start: dragTaskStart,
-                stop: dragTaskStop,
-                helper: dragTaskHelper
-            });
-
-            $(el).droppable({
-                over: dropTaskOver,
-            });
-        }
-
-        function make_list_draggable(el) {
-            $(el).draggable({
-                //containment: ".board",
-                cursor: "move",
-                start: dragListStart,
-                stop: dragListStop,
-                helper: dragListHelper
-            });
-        }
-
-        function make_list_droppable(el) {
-            $(el).droppable({
-                over: function(e, ui) {
-                    var o1 = ui.draggable;
-                    if (o1.hasClass("task")) {
-                        $(this).find(".cards").prepend(o1);
-                    } else {
-                        var o2 = $(this);
-                        if (o2.offset().left < o1.offset().left) {
-                            o1.insertBefore(o2);
-                        } else {
-                            o1.insertAfter(o2);
-                        }
-                    }
-                },
-                tolerance: "pointer"
-            });
-
-            $(el).find(".header").droppable({
-                over: function(e, ui) {
-                    var o1 = ui.draggable;
-                    if (o1.hasClass("task")) {
-                        $(this).parent().find(".cards").prepend(o1);
-                    }
-
-                }
-            });
-        }
-
-        // task drag functions
-        function dragTaskHelper(e) {
-            var helper = $(this).clone();
-            helper.addClass("dragging");
-            helper.width($(this).width());
-            return helper;
-        }
-
-        function dragTaskStart(e, ui) {
-            $(this).addClass("dragging-freeze");
-        }
-
-        function dragTaskStop(e, ui) {
-            $(this).removeClass("dragging-freeze");
-
-            // Change model order attr and update
-            var list = $(this).parent().parent();
-            var tasks = list.find(".task");
-            tasks.each(function(i, l) {
-                var obj = $(l);
-                if (!obj.hasClass("dragging")) {
-                    var view = _.find(taskviews, function(v) { return v.model.id === obj.attr("id") });
-                    view.model.set({"order": i, "listid": list.attr("id")}, {silent: true});
-                    view.$el.data("order", i);
-
-                    var url = '/api/boards/{{ boardid }}/lists/'+list.attr("id")+'/tasks/'+view.model.id+'/';
-                    var token = $("#csrf_token").val();
-                    var data = {'_csrf_token': token, 'order': i, 'listid': list.attr("id")};
-                    var req = $.ajax({url:url, data:data, type:"PUT"});
-                    req.done(function(data) {
-                        Ftask.updateCsrf();
-                    });
-                    req.fail(function(data) {
-                        Ftask.updateCsrf();
-                    });
-                }
-            });
-        }
-
-        function dropTaskOver(e, ui) {
-            var o1 = ui.draggable;
-            var o2 = $(this);
-            if (o1.hasClass("task")) {
-                o1.insertAfter(o2);
-            }
-        }
-
-        // list drag function
-        function dragListHelper(e) {
-            var helper = $(this).clone();
-            helper.addClass("dragging");
-            helper.width($(this).width());
-            return helper;
-        }
-
-        function dragListStart(e, ui) {
-            $(this).addClass("dragging-freeze");
-        }
-
-        function dragListStop(e, ui) {
-            $(this).removeClass("dragging-freeze");
-
-            // Change model order attr and update
-            $(".list").each(function(i, l) {
-                var obj = $(l);
-                if (!obj.hasClass("dragging")) {
-                    var view = _.find(views, function(v) { return v.model.id === obj.attr("id") });
-                    view.model.set({"order": i}, {silent: true});
-                    view.$el.data("order", i);
-
-                    var url = '/api/boards/{{ boardid }}/lists/'+view.model.id+'/';
-                    var token = $("#csrf_token").val();
-                    var data = {'_csrf_token': token, 'order': i};
-                    var req = $.ajax({url:url, data:data, type:"PUT"});
-                    req.done(function(data) {
-                        Ftask.updateCsrf();
-                    });
-                    req.fail(function(data) {
-                        Ftask.updateCsrf();
-                    });
-                }
-            });
-        }
-    </script>
-
-    <!-- backbone base -->
-    <script type="text/javascript">
-        var List = Backbone.Model.extend({
-            idAttribute: "id"
-        });
-        var Lists = Backbone.Collection.extend({
-            model: List,
-            parse: function(response) {
-                var models = new Array();
-                for (var i=0; i<response.meta.total; i++) {
-                    var model = new List(response.objects[i]);
-                    models.push(model);
-                }
-                return models;
-            },
-            url: '/api/boards/{{ boardid }}/lists/'
-        });
-
-        var ListView = Backbone.View.extend({
-            tagName: "div",
-            className: "list span3",
-            template: _.template($('#list-template').html()),
-
-            initialize: function() {
-                this.listenTo(this.model, 'change:name', this.name_changed);
-                this.listenTo(this.model, 'change:order', this.order_changed);
-                this.listenTo(this.model, 'destroy', this.remove);
-            },
-
-            render: function() {
-                this.$el.html(this.template(this.model.toJSON()));
-                var model = this.model;
-                this.$el.find(".name").dblclick(function() {
-                    BoardView.List.editNameForm($(this), model);
-                });
-                this.$el.find(".newcard").click(function() {
-                    BoardView.Task.newCardForm($(this).prev(), model);
-                });
-                this.$el.attr("id", model.id);
-                this.$el.data("order", model.get("order"));
-
-                return this;
-            },
-
-            name_changed: function() {
-                this.$el.find(".name").html(this.model.get("name"));
-            },
-
-            order_changed: function() {
-                this.$el.data("order", this.model.get("order"));
-                update_order();
-            }
-
-        });
-    </script>
-
-    <!-- backbone task base -->
-    <script type="text/javascript">
-        var Task = Backbone.Model.extend({
-            idAttribute: "id"
-        });
-        var Tasks = Backbone.Collection.extend({
-            model: Task,
-            parse: function(response) {
-                var models = new Array();
-                for (var i=0; i<response.meta.total; i++) {
-                    var model = new List(response.objects[i]);
-                    models.push(model);
-                }
-                return models;
-            },
-            url: function() {
-                return '/api/boards/{{ boardid }}/lists/' + this.lurl + '/tasks/';
-            }
-        });
-
-        var TaskView = Backbone.View.extend({
-            tagName: "div",
-            className: "task",
-            template: _.template($('#task-template').html()),
-
-            initialize: function() {
-                this.listenTo(this.model, 'change:description', this.description_changed);
-                this.listenTo(this.model, 'change:order', this.order_changed);
-                //this.listenTo(this.model, 'change:listid', this.order_changed);
-                this.listenTo(this.model, 'destroy', this.remove);
-            },
-
-            render: function() {
-                this.$el.html(this.template(this.model.toJSON()));
-                var model = this.model;
-                this.$el.attr("id", model.id);
-                this.$el.data("order", model.get("order"));
-
-                return this;
-            },
-
-            description_changed: function() {
-                this.$el.find(".name").html(this.model.get("description"));
-            },
-
-            order_changed: function() {
-                this.$el.data("order", this.model.get("order"));
-                update_task_order(this.model.get("listid"));
-            }
-
-
-        });
-    </script>
-
     <!-- this page stuff -->
     <script type="text/javascript">
-        var ls = new Lists();
-        var views = new Array();
-        var taskviews = new Array();
-        var taskcollections = new Array();
-        ls.on("add", function(l) {
-            var view = new ListView({model: l});
-            var el = $(view.render().el);
-
-            make_list_draggable(el);
-            make_list_droppable(el);
-            $("#list-list").append(el);
-
-            views.push(view);
-
-            // task collection
-            var tc = new Tasks();
-            tc.lurl = l.id;
-            tc.on("add", function(t) {
-                var view = new TaskView({model: t});
-                var el = $(view.render().el);
-                $("#"+ t.get("listid") + " .cards").append(el);
-
-                make_task_draggable(el);
-                taskviews.push(view);
-            });
-            tc.on("remove", function(t) {
-                var view = _.find(taskviews, function(v) { return v.model === t});
-                view.remove();
-                taskviews = _.filter(taskviews, function(v) { return v.model != t });
-            });
-            taskcollections.push(tc);
-            tc.fetch({update: true});
-        });
-        ls.on("remove", function(l) {
-            var view = _.find(views, function(v) { return v.model === l});
-            view.remove();
-            views = _.filter(views, function(v) { return v.model != l });
-            // removing task view
-            var tv = _.find(taskviews, function(tv) { return tv.model.get("listid") === l.id });
-            tv.remove();
-            taskviews = _.filter(taskviews, function(tv) { return tv.model.get("listid") != l.id });
-            // removing task collection
-            var tc = _.find(taskcollections, function(tc) { return tc.lurl === l.id });
-            tc.remove();
-            taskcollections = _.filter(taskcollections, function(tc) { return tc.lurl != l.id });
-
-        });
-
-        ls.fetch({update: true});
-
-        update_board();
+        BoardView.sync();
+        setInterval('BoardView.sync()', 5000);
 
         Ftask.form("#list-form",
                    function(data) {
                         alert("ERROR");
                    },
                    function(data) {
-                        ls.fetch({update: true});
+                        BoardView.sync();
                         $("#modal").modal("hide");
                    });
 
@@ -487,7 +190,7 @@
                    },
                    function(data) {
                         $("#edit-board-modal").modal("hide");
-                        update_board();
+                        BoardView.updateBoard();
                    });
 
         Ftask.form("#share-form",
@@ -496,86 +199,13 @@
                    },
                    function(data) {
                         $("#member-modal").modal("hide");
-                        update_board();
+                        BoardView.updateBoard();
                    });
 
-        setInterval('sync()', 5000);
-
-        function delete_list(url) {
-            var token = $("#csrf_token").val();
-            var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
-            req.done(function(data) {
-                ls.fetch({update: true});
-                Ftask.updateCsrf();
-            });
-            req.fail(function(data) {
-                alert("ERROR");
-                Ftask.updateCsrf();
-            });
-        }
-
-        function unshare(username) {
-            var url = '/api/boards/{{ boardid }}/unshare/';
-            var token = $("#csrf_token").val();
-            var data = {'_csrf_token': token, 'user': username};
-            var req = $.ajax({url:url, data:data, type:"POST"});
-            req.done(function(data) {
-                Ftask.updateCsrf();
-                update_board();
-            });
-            req.fail(function(data) {
-                Ftask.updateCsrf();
-            });
-        }
-
-        function update_order() {
-            var sorted_list = $(".list").sort(function(a, b) { return $(a).data("order") < $(b).data("order") ? -1 : 1 });
-            $("#list-list").append(sorted_list);
-        }
-
-        function update_task_order(lid) {
-            var obj = $("#"+ lid + " .task");
-            var sorted_tasks = obj.sort(function(a, b) { return $(a).data("order") < $(b).data("order") ? -1 : 1 });
-            var cards = $("#"+ lid + " .cards");
-            cards.append(sorted_tasks);
-        }
-
-        function update_board() {
-            $.get('/api/boards/{{ boardid }}/', function(data) {
-                $(".boardname").html(data.name);
-                $("title").html($("title").html() + ' - ' + data.name);
-                $(".members").empty();
-                for (var i = 0; i < data.shared.length; i++) {
-                    var u = data.shared[i];
-                    var img = $.gravatar(u.email, {'size': 30});
-                    var template = _.template($('#miniuser-template').html());
-                    $(".members").append(template({user: u.username, url: img.attr("src")}));
-                }
-
-                $(".admin").empty();
-                for (var i = 0; i < data.admins.length; i++) {
-                    var u = data.admins[i];
-                    var img = $.gravatar(u.email, {'size': 30});
-                    var template = _.template($('#miniuser-template').html());
-                    $(".admin").append(template({user: u.username, url: img.attr("src")}));
-                }
-            });
-        }
-
-        $('.gravatar-mini').each(function() {
-            $(this).html($.gravatar($(this).data("email"), {'size': 30}));
-        });
-
-        function sync() {
-            ls.fetch({update: true});
-            _.each(taskcollections, function(tc) {
-                tc.fetch({update: true});
-            });
-        }
-
+        // member autocomplete
         $( "#sharedname" ).autocomplete({
             source: function(req, response) {
-                $.get("/api/users/find/?q=" + req.term,
+                $.get(Ftask.baseApiAuth + "/find/?q=" + req.term,
                       function(data) {
                         response( $.map( data.objects, function(item) {
                             return {
@@ -597,13 +227,11 @@
         }).data("autocomplete")._renderItem = function( ul, item ) {
             var img = $('<span class="gravatar-mini"></span>');
             img.html($.gravatar(item.email, {'size': 30}));
-            console.log(img.html());
             return $( "<li>" )
                 .data( "item.autocomplete", item )
                 .append('<a>' + img.html() + item.label + "</a>" )
                 .appendTo(ul);
         };
-
     </script>
 
 {% endblock %}
