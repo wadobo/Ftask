@@ -183,6 +183,7 @@
 
     function dragListStart(e, ui) {
         $(this).addClass("dragging-freeze");
+        BoardView.syncLock = true;
     }
 
     function dragListStop(e, ui) {
@@ -202,9 +203,11 @@
                 var req = $.ajax({url:url, data:data, type:"PUT"});
                 req.done(function(data) {
                     Ftask.updateCsrf();
+                    BoardView.syncLock = false;
                 });
                 req.fail(function(data) {
                     Ftask.updateCsrf();
+                    BoardView.syncLock = false;
                 });
             }
         });

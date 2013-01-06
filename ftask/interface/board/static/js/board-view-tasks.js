@@ -156,6 +156,7 @@
 
     function dragTaskStart(e, ui) {
         $(this).addClass("dragging-freeze");
+        BoardView.syncLock = true;
     }
 
     function dragTaskStop(e, ui) {
@@ -177,9 +178,11 @@
                 var req = $.ajax({url:url, data:data, type:"PUT"});
                 req.done(function(data) {
                     Ftask.updateCsrf();
+                    BoardView.syncLock = false;
                 });
                 req.fail(function(data) {
                     Ftask.updateCsrf();
+                    BoardView.syncLock = false;
                 });
             }
         });
