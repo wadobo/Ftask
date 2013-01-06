@@ -153,33 +153,6 @@
             <a href="#" class="close">&times;</a>
         </form>
     </script>
-    <script type="text/javascript">
-        function task_new_card_form(p, obj) {
-            if (p.find("#task-"+obj.id).length > 0) {
-                p.find("textarea").focus();
-                return;
-            }
-
-            var template = _.template($('#new-task-template').html());
-            var tmpl = template({id: obj.get('id')});
-            p.prepend(tmpl);
-            p.find("form").attr("id", "task-"+obj.id);
-            p.find(".close").click(function() {
-                $(this).parent().remove();
-            });
-
-            p.find("textarea").focus();
-
-            Ftask.form("#task-"+obj.id,
-                       function(data) {
-                            alert("ERROR");
-                       },
-                       function(data) {
-                            $("#task-"+obj.id).remove();
-                            sync();
-                       });
-        }
-    </script>
 
     <!-- doubleclick list name update -->
     <script type="text/template" id="edit-listname-template">
@@ -189,30 +162,10 @@
             <a href="#" class="close">&times;</a>
         </form>
     </script>
-    <script type="text/javascript">
-        function show_form(p, obj) {
-            if (p.find("#name-"+obj.id).length > 0) {
-                return;
-            }
 
-            var template = _.template($('#edit-listname-template').html());
-            var tmpl = template({id: obj.get('id'), name: obj.get('name')});
-            p.prepend(tmpl);
-            p.find(".close").click(function() {
-                $(this).parent().remove();
-            });
-            p.find("form").attr("id", "name-"+obj.id);
-
-            Ftask.form("#name-"+obj.id,
-                       function(data) {
-                            alert("ERROR");
-                       },
-                       function(data) {
-                            $(this).remove();
-                            sync();
-                       });
-        }
-    </script>
+    <script type="text/javascript" src="{{ url_for('.static', filename='js/board-view.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('.static', filename='js/board-view-tasks.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('.static', filename='js/board-view-lists.js') }}"></script>
 
     <!-- drag and drop -->
     <script type="text/javascript">
@@ -388,10 +341,10 @@
                 this.$el.html(this.template(this.model.toJSON()));
                 var model = this.model;
                 this.$el.find(".name").dblclick(function() {
-                    show_form($(this), model);
+                    BoardView.List.editNameForm($(this), model);
                 });
                 this.$el.find(".newcard").click(function() {
-                    task_new_card_form($(this).prev(), model);
+                    BoardView.Task.newCardForm($(this).prev(), model);
                 });
                 this.$el.attr("id", model.id);
                 this.$el.data("order", model.get("order"));
