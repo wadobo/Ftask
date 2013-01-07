@@ -93,7 +93,7 @@
     BoardView.updateBoard = function () {
         $.get(Ftask.baseApiBoard + '/' + BoardView.boardId + '/', function(data) {
             $(".boardname").html(data.name);
-            $("title").html($("title").html() + ' - ' + data.name);
+            $("title").html(data.name);
         });
         BoardView.members.fetch({update: true});
     }
