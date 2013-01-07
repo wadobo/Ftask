@@ -6,7 +6,7 @@
 {% include "navbar.html" %}
 {% endblock %}
 
-{% block precontainer %}
+{% block content %}
 {{ csrf_token()|safe }}
 
 <!-- member name modal -->
@@ -97,46 +97,44 @@
     </div>
 </div>
 
-<div class="board-container container">
-    <div class="row">
-        <!-- header -->
-        <div class="span12">
-            <h4>
-                <span class="boardname"></span>
-                <button class="btn"
-                data-toggle="modal"
-                data-target="#edit-board-modal"><i class="icon-pencil"></i></button>
-            </h4>
-        </div>
+<div class="row">
+    <!-- header -->
+    <div class="span12">
+        <h4>
+            <span class="boardname"></span>
+            <button class="btn"
+            data-toggle="modal"
+            data-target="#edit-board-modal"><i class="icon-pencil"></i></button>
+        </h4>
+    </div>
 
-        <!-- board -->
-        <div class="span10">
-            <div class="board" >
-                <div id="list-list" class="row-fluid">
-                </div>
+    <!-- board -->
+    <div class="span10">
+        <div class="board" >
+            <div id="list-list" class="row-fluid">
             </div>
         </div>
+    </div>
 
-        <!-- right menu -->
-        <div class="span2">
-            <h4>Members</h4>
-                <div class="member-lists">
-                    <ul class="inline admin"> </ul>
-                    <ul class="inline members"> </ul>
-                </div>
-                <div class="board-buttons">
-                <button class="btn" data-toggle="modal" data-target="#member-modal"><i class="icon-user"></i> Add Members</button>
-                </div>
-            <h4>Board</h4>
-                <div class="board-buttons">
-                <button class="btn" data-toggle="modal" data-target="#modal"><i class="icon-list"></i> Add List</button>
-                <button class="btn"><i class="icon-wrench"></i> Options</button>
-                </div>
-            <h4>Activity</h4>
-        </div>
+    <!-- right menu -->
+    <div class="span2">
+        <h4>Members</h4>
+            <div class="member-lists">
+                <ul class="inline admin"> </ul>
+                <ul class="inline members"> </ul>
+            </div>
+            <div class="board-buttons">
+            <button class="btn" data-toggle="modal" data-target="#member-modal"><i class="icon-user"></i> Add Members</button>
+            </div>
+        <h4>Board</h4>
+            <div class="board-buttons">
+            <button class="btn" data-toggle="modal" data-target="#modal"><i class="icon-list"></i> Add List</button>
+            <button class="btn"><i class="icon-wrench"></i> Options</button>
+            </div>
+        <h4>Activity</h4>
+    </div>
 
-    </div><!-- row -->
-</div><!-- container -->
+</div><!-- row -->
 
 {% endblock %}
 

@@ -17,7 +17,7 @@
 from __future__ import division, absolute_import
 
 from flask import Flask
-from flask import render_template
+from flask import redirect, url_for
 from app.auth.views import auth, auth_before_request
 from app.auth.views import csrf_token
 from app.board.views import board
@@ -58,7 +58,7 @@ app.register_blueprint(boardi, url_prefix='/board')
 # basic views
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return redirect(url_for('boardi.list_board'))
 
 
 if __name__ == "__main__":

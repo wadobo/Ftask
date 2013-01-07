@@ -51,6 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <link href="{{ url_for('static', filename='css/loading.css') }}" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/board.css') }}" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/draggable.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/base.css') }}" rel="stylesheet">
 
         <link href="{{ url_for('static', filename='jquery-ui/css/vader/jquery-ui-1.9.2.custom.css') }}" rel="stylesheet">
 
@@ -87,6 +88,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <footer id="footer">
         {% block footer %}
         {% endblock %}
+
+
+        <div class="row">
+            <div class="span12">
+                <p class="muted">
+                Powered by <a href="http://python.org">Python</a>,
+                           <a href="http://flask.pocoo.org/">Flask</a>,
+                           <a href="http://backbonejs.org/">Backbone</a>,
+                           <a href="http://http://twitter.github.com/bootstrap/">Twitter Bootstrap</a>
+                <br>Licenced under AGPLv3, get the <a href="https://github.com/danigm/Ftask">code</a>
+                </p>
+                <a href="http://wadobo.com">
+                    <img id="danigm" alt="powered by wadobolabs" src="/static/img/wadobolabs.png">
+                </a>
+            </div>
+        </div>
+
         </footer>
         </div>
         {% endblock %}
