@@ -224,7 +224,7 @@
         $(this).removeClass("dragging-freeze");
 
         // Change model order attr and update
-        var list = $(this).parent().parent();
+        var list = $(this).parent().parent().parent();
         var tasks = list.find(".task");
         tasks.each(function(i, l) {
             var obj = $(l);
