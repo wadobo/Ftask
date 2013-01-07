@@ -108,11 +108,63 @@
             this.$el.attr("id", model.id);
             this.$el.data("order", model.get("order"));
 
+            // task modal
+            this.$el.click(function() {
+                var l = _.find(BoardView.List.collection.models, function(v) { return v.id === model.get("listid") });
+                $('#task-modal').modal('show');
+                $('#task-modal').find(".taskname").html(model.get("description"));
+                $('#task-modal').find(".listname").html(l.get("name"));
+                var nf = $('#task-modal').find(".name-form");
+                var header = $('#task-modal').find(".header");
+                var ta = nf.find("textarea");
+                ta.val(model.get("description"));
+                nf.hide();
+
+                $('#task-modal').find(".taskname").click(function() {
+                    nf.show();
+                    header.hide();
+                    nf.data('url', Ftask.baseApiBoard + '/' + BoardView.boardId + '/lists/' + l.id + '/tasks/' + model.id + '/');
+
+                    Ftask.form("#task-modal .name-form",
+                               function(data) {
+                                    alert("ERROR");
+                               },
+                               function(data) {
+                                    BoardView.sync();
+                                    $('#task-modal').find(".taskname").html(ta.val());
+                                    nf.hide();
+                                    header.show();
+                               });
+                });
+
+                $('#task-modal').find(".close").click(function() {
+                    nf.hide();
+                    header.show();
+                });
+
+                // remove action
+                $('#task-modal').find(".remove-action").click(function() {
+                    var token = $("#csrf_token").val();
+                    var url = Ftask.baseApiBoard + '/' + BoardView.boardId + '/lists/' + model.get("listid") + '/tasks/' + model.id + '/';
+                    var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
+                    req.done(function(data) {
+                    $('#task-modal').modal('hide');
+                        BoardView.sync();
+                        Ftask.updateCsrf();
+                    });
+                    req.fail(function(data) {
+                        alert("ERROR");
+                        Ftask.updateCsrf();
+                    });
+                    return false;
+                });
+            });
+
             return this;
         },
 
         descriptionChanged: function() {
-            this.$el.find(".name").html(this.model.get("description"));
+            this.$el.find(".description").html(this.model.get("description"));
         },
 
         orderChanged: function() {

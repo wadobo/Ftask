@@ -15,11 +15,11 @@
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h3>Members</h3>
     </div>
-    <div class="user">
-        <span class="gravatar"></span>
-        <span class="name"></span>
-    </div>
     <div class="modal-body">
+        <div class="user">
+            <span class="gravatar"></span>
+            <span class="name"></span>
+        </div>
         <form method="POST" id="share-form" class="form-horizontal" data-url="{{ url_for('board.share_board', boardid=boardid) }}">
             <input type="text" id="sharedname" name="user" placeholder="user name"/>
             <button class="btn btn-info">Add</button>
@@ -71,6 +71,31 @@
     </div>
 </div>
 
+<!-- task modal -->
+<div id="task-modal" class="modal hide fade">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Edit task</h3>
+    </div>
+    <div class="modal-body">
+        <div class="row-fluid">
+            <div class="span9 main">
+                <h4 class="header"><span class="taskname"></span> <span class="muted">in list <span class="listname text-info"></span></span></h4>
+                <form method="PUT" class="name-form" class="form" data-url="">
+                    <div class="description">
+                        <textarea name="description"></textarea>
+                    </div>
+                    <input class="btn btn-info" type="submit" value="Save"/>
+                    <a href="#" class="close">&times;</a>
+                </form>
+            </div>
+            <div class="span3 menu">
+                <h4>Actions</h4>
+                <a href="#" class="btn remove-action"><i class="icon-trash"></i> Remove</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="board-container container">
     <div class="row">
