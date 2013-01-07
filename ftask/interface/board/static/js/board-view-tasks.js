@@ -120,7 +120,7 @@
                 ta.val(model.get("description"));
                 nf.hide();
 
-                $('#task-modal').find(".taskname").click(function() {
+                $('#task-modal').find(".taskname").unbind('click').click(function() {
                     nf.show();
                     header.hide();
                     nf.data('url', Ftask.baseApiBoard + '/' + BoardView.boardId + '/lists/' + l.id + '/tasks/' + model.id + '/');
@@ -137,13 +137,13 @@
                                });
                 });
 
-                $('#task-modal').find(".close").click(function() {
+                $('#task-modal').find(".close").unbind('click').click(function() {
                     nf.hide();
                     header.show();
                 });
 
                 // remove action
-                $('#task-modal').find(".remove-action").click(function() {
+                $('#task-modal').find(".remove-action").unbind('click').click(function() {
                     var token = $("#csrf_token").val();
                     var url = Ftask.baseApiBoard + '/' + BoardView.boardId + '/lists/' + model.get("listid") + '/tasks/' + model.id + '/';
                     var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});

@@ -39,7 +39,7 @@
             $("#loading").fadeOut();
         }
 
-        $(id).submit(function() {
+        $(id).unbind('submit').submit(function() {
             var url = $(id).data("url");
             var data = $(id).serialize();
             var method = $(id).attr("method");
