@@ -80,7 +80,10 @@ def update_board_list(board, lid, user, newdata):
     for l in board.get('lists', []):
         if l['id'] == lid:
             for k, v in newdata.items():
-                l[k] = v
+                if k == "order":
+                    l[k] = int(v)
+                else:
+                    l[k] = v
 
     get_db().boards.save(board)
 

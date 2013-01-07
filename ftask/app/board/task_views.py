@@ -113,7 +113,10 @@ def task_list(t):
 
 def update_task(task, user, newdata):
     for k, v in newdata.items():
-        task[k] = v
+        if k == "order":
+            task[k] = int(v)
+        else:
+            task[k] = v
 
     get_db().tasks.save(task)
 
