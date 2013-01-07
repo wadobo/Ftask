@@ -1,6 +1,6 @@
 <div class="navbar navbar-inverse">
     <div class="navbar-inner">
-        <a class="brand" href="#">Ftask</a>
+        <a class="brand" href="{{ url_for('boardi.list_board') }}"><img src="{{ url_for('static', filename='img/logo-white.png') }}" alt="FTask"/></a>
         <ul class="nav">
             <li {% if selected == "profile" %}class="active"{% endif %}><a href="{{ url_for('authi.profile') }}">Profile</a></li>
             <li {% if selected == "board" %}class="active"{% endif %}><a href="{{ url_for('boardi.list_board') }}">Boards</a></li>
