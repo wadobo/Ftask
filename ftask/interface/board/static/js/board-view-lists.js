@@ -48,7 +48,7 @@
 
     List.ListView = Backbone.View.extend({
         tagName: "div",
-        className: "list span3",
+        className: "list",
         template: _.template($('#list-template').html()),
 
         initialize: function() {
@@ -64,7 +64,7 @@
                 List.editNameForm($(this), model);
             });
             this.$el.find(".newcard").click(function() {
-                BoardView.Task.newCardForm($(this).prev(), model);
+                BoardView.Task.newCardForm($(this).parent().find(".newcardform"), model);
             });
             this.$el.find(".close").click(function() {
                 var token = $("#csrf_token").val();
@@ -113,6 +113,8 @@
 
         // creating task views
         BoardView.Task.createTaskCollection(l);
+
+        BoardView.resizeBoard();
     });
     List.collection.on("remove", function(l) {
         var view = _.find(List.views, function(v) { return v.model === l});
@@ -121,6 +123,11 @@
 
         // removing task views
         BoardView.Task.removeTaskCollection(l);
+
+        BoardView.resizeBoard();
+    });
+    List.collection.on("change", function(l) {
+        BoardView.resizeBoard();
     });
 
 
@@ -137,6 +144,7 @@
     function makeListDraggable(el) {
         $(el).draggable({
             //containment: ".board",
+            handle: ".header",
             cursor: "move",
             start: dragListStart,
             stop: dragListStop,

@@ -110,7 +110,33 @@
             });
             BoardView.syncLock = false;
         }
+        // TODO move to collection post fetch
+        //BoardView.resizeBoard();
     }
+
+    BoardView.resizeBoard = function() {
+        var size = ($(window).height() - $(".board").offset().top - 40);
+        $(".board").css("height",  size + "px");
+
+        $(".cardoverflow").css("height", "auto");
+
+        if ($(window).width() <= 480) {
+            $("#list-list").css("width", "auto");
+        } else {
+            var width = ($(".list").length) * ($(".list").width() + 13);
+            $("#list-list").css("width", width + "px");
+
+            var cardSize = (size - 80);
+            $(".cardoverflow").each(function() {
+                if ($(this).height() > cardSize)
+                    $(this).css("height",  cardSize + "px");
+            });
+        }
+    }
+
+    $(window).resize(function() {
+        BoardView.resizeBoard();
+    });
 
 }).call(this);
 

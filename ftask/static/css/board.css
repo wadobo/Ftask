@@ -39,17 +39,31 @@
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
-    padding: 10px;
+    padding: 4px;
 
     margin-bottom: 10px;
 
-   border-bottom: 1px solid #404040;
-   border-top: 1px solid #FFFFFF;
+    border-bottom: 1px solid #404040;
+    border-top: 1px solid #FFFFFF;
+
+    margin-right: 5px;
+}
+
+.list .header {
+    font-weight: bold;
+    padding: 5px;
+}
+
+@media (min-width: 480px) {
+    .list {
+        float: left;
+        width: 180px;
+    }
 }
 
 .newcard {
     padding: 5px;
-    margin: -10px;
+    margin: -4px;
     margin-top: 10px;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
@@ -66,6 +80,10 @@
 .description textarea {
     width: 100%;
     padding: 0px;
+}
+
+.newcardform {
+    padding: 4px 3px 1px;
 }
 
 .task {
@@ -88,6 +106,7 @@
     transition-property: background, margin-bottom, opacity;
     transition-timing-function: ease-out;
     z-index: 0;
+    padding: 4px 3px 1px;
 }
 
 .task:hover {
@@ -108,3 +127,14 @@
 .member-lists {
     margin-bottom: 5px;
 }
+
+.cardoverflow {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.board {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+

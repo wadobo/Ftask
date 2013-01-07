@@ -50,11 +50,20 @@
 
             makeTaskDraggable(el);
             Task.views.push(view);
+
+            //updateTaskOrder(t.model.get("listid"));
+            BoardView.resizeBoard();
         });
         tc.on("remove", function(t) {
             var view = _.find(Task.views, function(v) { return v.model === t});
             view.remove();
             Task.views = _.filter(Task.views, function(v) { return v.model != t });
+
+            //updateTaskOrder(t.model.get("listid"));
+            BoardView.resizeBoard();
+        });
+        tc.on("change", function(l) {
+            BoardView.resizeBoard();
         });
         Task.collections.push(tc);
         tc.fetch({update: true});
