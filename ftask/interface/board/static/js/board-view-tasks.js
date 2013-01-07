@@ -116,8 +116,19 @@
             var model = this.model;
             this.$el.attr("id", model.id);
             this.$el.data("order", model.get("order"));
+            this.$el.data("order", model.get("order"));
+
+            var assign = model.get("assign");
+            var members = this.$el.find(".onetaskmembers");
+            $(".taskmembers").empty();
+            for (var i = 0; i < assign.length; i++) {
+                var u = assign[i];
+                var img = $.gravatar(u["email"], {'size': 30});
+                members.append('<span class="miniuser"><img src="'+img.attr('src')+'"/></span>');
+            }
 
             // task modal
+            // TODO move this to other js file
             this.$el.click(function() {
                 var l = _.find(BoardView.List.collection.models, function(v) { return v.id === model.get("listid") });
                 $('#task-modal').modal('show');
@@ -128,6 +139,28 @@
                 var ta = nf.find("textarea");
                 ta.val(model.get("description"));
                 nf.hide();
+
+                // members
+                var assign = model.get("assign");
+                $(".taskmembers").empty();
+                for (var i = 0; i < assign.length; i++) {
+                    var u = assign[i];
+                    var img = $.gravatar(u["email"], {'size': 30});
+                    $(".taskmembers").append('<li class="miniuser"><img src="'+img.attr('src')+'"/></li>');
+                    // TODO add dropdown menu to remove
+                }
+
+                // all members
+                $(".allmembers").empty();
+                for (var i = 0; i < BoardView.members.models.length; i++) {
+                    var u = BoardView.members.models[i];
+                    var img = $.gravatar(u.get("email"), {'size': 30});
+                    var link = $('<li data-user="'+u.get('username')+'"><a href="#" class="miniuser"><img src="'+img.attr('src')+'"/>'+u.get('username')+'</a></li>');
+                    $(".allmembers").append(link);
+                    link.click(function() {
+                        Task.assign(model, $(this).data('user'));
+                    });
+                }
 
                 $('#task-modal').find(".taskname").unbind('click').click(function() {
                     nf.show();
@@ -181,6 +214,26 @@
             updateTaskOrder(this.model.get("listid"));
         }
     });
+
+    Task.assign = function(t, user) {
+        var token = $("#csrf_token").val();
+        var url = Ftask.baseApiBoard + '/' + BoardView.boardId + '/lists/' + t.get("listid") + '/tasks/' + t.id + '/assign/';
+        var data = {'_csrf_token': token, 'user': user};
+        var req = $.ajax({url:url, data: data, type:"POST"});
+        req.done(function(data) {
+            BoardView.sync();
+            Ftask.updateCsrf();
+
+            var u = _.find(BoardView.members.models, function(m) { return m.get('username') === user; });
+            var img = $.gravatar(u.get("email"), {'size': 30});
+            $(".taskmembers").append('<span class="miniuser"><img src="'+img.attr('src')+'"/></span>');
+        });
+        req.fail(function(data) {
+            alert("ERROR");
+            Ftask.updateCsrf();
+        });
+        return false;
+    }
 
     // internal functions
 

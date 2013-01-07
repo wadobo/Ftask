@@ -92,6 +92,15 @@
             <div class="span3 menu">
                 <h4>Actions</h4>
                 <a href="#" class="btn remove-action"><i class="icon-trash"></i> Remove</a>
+                <h4>Members</h4>
+                <div class="action-member-lists">
+                    <ul class="inline taskmembers"> </ul>
+                </div>
+                <div class="btn-group memberimg">
+                    <a href="#" class="dropdown-toggle btn assign-action" data-toggle="dropdown"><i class="icon-user"></i> Assign</a>
+                    <ul class="dropdown-menu allmembers">
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -168,6 +177,8 @@
 
     <script type="text/template" id="task-template">
         <span class="description"><%- description %></span>
+        <ul class="pull-right inline onetaskmembers"> </ul>
+        <div class="clear"></div>
     </script>
 
     <!-- new task form -->

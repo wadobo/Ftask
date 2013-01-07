@@ -49,7 +49,7 @@ def view_list_tasks(boardid, listid):
     t = c.find({'listid': listid}).sort([('order', 1)])
     meta = {}
     meta['total'] = t.count()
-    objs = [to_json(i) for i in t]
+    objs = [serialize_task(i) for i in t]
 
     return jsonify(meta=meta,
                    objects=objs)
@@ -86,7 +86,7 @@ def view_list_task(boardid, listid, taskid):
     if request.method == 'GET':
         if not t:
             raise abort(404)
-        return jsonify(to_json(t))
+        return jsonify(serialize_task(t))
     elif request.method == 'PUT':
         update_task(t, g.user, request.form)
     elif request.method == 'DELETE':
@@ -95,6 +95,48 @@ def view_list_task(boardid, listid, taskid):
     return jsonify(status="success")
 view_list_task.path = '/<boardid>/lists/<listid>/tasks/<taskid>/'
 view_list_task.methods = ['GET', 'PUT', 'DELETE']
+
+
+@authenticated
+@can_view_board
+def assign_task(boardid, listid, taskid):
+    c = get_db().tasks
+    t = c.find_one({'boardid': boardid, 'listid': listid, '_id': ObjectId(taskid)})
+    if not t:
+        raise abort(404)
+
+    # not with the same name
+    user = request.form['user']
+    assign = t.get('assign', [])
+    if user in assign:
+        return jsonify(status="success")
+
+    t['assign'] = t.get('assign', []) + [user]
+    c.save(t)
+
+    return jsonify(status="success")
+assign_task.path = '/<boardid>/lists/<listid>/tasks/<taskid>/assign/'
+assign_task.methods = ['POST']
+
+
+@authenticated
+@can_view_board
+def unassign_task(boardid, listid, taskid):
+    c = get_db().tasks
+    t = c.find_one({'boardid': boardid, 'listid': listid, '_id': ObjectId(taskid)})
+    if not t:
+        raise abort(404)
+
+    # not with the same name
+    user = request.form['user']
+    l = t.get('assign', [])
+    l.remove(user)
+    t['assign'] = l
+    c.save(t)
+
+    return jsonify(status="success")
+unassign_task.path = '/<boardid>/lists/<listid>/tasks/<taskid>/unassign/'
+unassign_task.methods = ['POST']
 
 
 def task_board(t):
@@ -123,3 +165,11 @@ def update_task(task, user, newdata):
 
 def delete_task(task, user):
     get_db().tasks.remove({'_id': task['_id']})
+
+
+def serialize_task(t):
+    s = t.get('assign', [])
+    t['assign'] = [to_json(u, excludes=['password']) for u in get_db().users.find({"username": {"$in": s}})]
+    serialized = to_json(t)
+
+    return serialized
