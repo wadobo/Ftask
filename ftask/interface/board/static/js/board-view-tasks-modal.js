@@ -2,14 +2,16 @@
     var Task = this.BoardView.Task;
     var Modal = this.BoardView.Task.Modal = {};
 
+    Modal.taskId = "";
     Modal.taskModal = function(model) {
         $('#task-modal').modal('show');
+        Modal.taskId = model.id;
 
         // task modal description and edit with click
         taskModalDescription(model);
 
         // members
-        taskModalMembers(model);
+        Modal.taskModalMembers(model);
 
         // remove action
         taskModalRemoveAction(model);
@@ -50,14 +52,25 @@
         });
     }
 
-    taskModalMembers = function(model) {
+    Modal.taskModalMembers = function(model) {
         var assign = model.get("assign");
         $(".taskmembers").empty();
         for (var i = 0; i < assign.length; i++) {
             var u = assign[i];
             var img = $.gravatar(u["email"], {'size': 30});
-            $(".taskmembers").append('<li class="miniuser"><img src="'+img.attr('src')+'"/></li>');
+
             // TODO add dropdown menu to remove
+            var template = _.template($('#assign-template').html());
+            var tmpl = $(template({url: img.attr('src'), user: u['username']}));
+            $(".taskmembers").append(tmpl);
+
+            function bindUnassign(tmpl, u) {
+                tmpl.find(".remove-user").click(function() {
+                    console.log(u['username']);
+                    Task.unassign(model, u['username']);
+                });
+            }
+            bindUnassign(tmpl, u);
         }
 
         // all members

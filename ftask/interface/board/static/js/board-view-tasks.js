@@ -107,6 +107,7 @@
         initialize: function() {
             this.listenTo(this.model, 'change:description', this.descriptionChanged);
             this.listenTo(this.model, 'change:order', this.orderChanged);
+            this.listenTo(this.model, 'change:assign', this.assignChanged);
             //this.listenTo(this.model, 'change:listid', this.orderChanged);
             this.listenTo(this.model, 'destroy', this.remove);
         },
@@ -118,14 +119,7 @@
             this.$el.data("order", model.get("order"));
             this.$el.data("order", model.get("order"));
 
-            var assign = model.get("assign");
-            var members = this.$el.find(".onetaskmembers");
-            $(".taskmembers").empty();
-            for (var i = 0; i < assign.length; i++) {
-                var u = assign[i];
-                var img = $.gravatar(u["email"], {'size': 30});
-                members.append('<span class="miniuser"><img src="'+img.attr('src')+'"/></span>');
-            }
+            this.assignChanged();
 
             this.$el.click(function() {
                 Task.Modal.taskModal(model);
@@ -136,6 +130,21 @@
 
         descriptionChanged: function() {
             this.$el.find(".description").html(this.model.get("description"));
+        },
+
+        assignChanged: function() {
+            var model = this.model;
+            var assign = model.get("assign");
+            var members = this.$el.find(".onetaskmembers");
+            members.empty();
+            for (var i = 0; i < assign.length; i++) {
+                var u = assign[i];
+                var img = $.gravatar(u["email"], {'size': 30});
+                members.append('<span class="miniuser"><img src="'+img.attr('src')+'"/></span>');
+            }
+            if (Task.Modal.taskId === model.id) {
+                Task.Modal.taskModalMembers(model);
+            }
         },
 
         orderChanged: function() {
@@ -155,7 +164,25 @@
 
             var u = _.find(BoardView.members.models, function(m) { return m.get('username') === user; });
             var img = $.gravatar(u.get("email"), {'size': 30});
-            $(".taskmembers").append('<span class="miniuser"><img src="'+img.attr('src')+'"/></span>');
+        });
+        req.fail(function(data) {
+            alert("ERROR");
+            Ftask.updateCsrf();
+        });
+        return false;
+    }
+
+    Task.unassign = function(t, user) {
+        var token = $("#csrf_token").val();
+        var url = Ftask.baseApiBoard + '/' + BoardView.boardId + '/lists/' + t.get("listid") + '/tasks/' + t.id + '/unassign/';
+        var data = {'_csrf_token': token, 'user': user};
+        var req = $.ajax({url:url, data: data, type:"POST"});
+        req.done(function(data) {
+            BoardView.sync();
+            Ftask.updateCsrf();
+
+            var u = _.find(BoardView.members.models, function(m) { return m.get('username') === user; });
+            var img = $.gravatar(u.get("email"), {'size': 30});
         });
         req.fail(function(data) {
             alert("ERROR");

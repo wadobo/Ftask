@@ -149,6 +149,20 @@
 
 {% block scripts %}
     {{ super() }}
+    <script type="text/template" id="assign-template">
+        <li class="btn-group memberimg miniuser">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                <img src="<%=url%>" alt="<%-user%>" title="<%-user%>" />
+            </a>
+            <ul class="dropdown-menu">
+                <li> <img src="<%=url%>"> <%-user%> </li>
+                <li class="remove">
+                    <a href="#" class="remove-user">Remove from task <i class="icon-remove"></i></a>
+                </li>
+            </ul>
+        </li>
+    </script>
+
     <script type="text/template" id="miniuser-template">
         <li class="btn-group memberimg">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#">
