@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Ftask, simple TODO list application
 # Copyright (C) 2012 Daniel Garcia <danigm@wadobo.com>
 
