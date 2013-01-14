@@ -1,15 +1,25 @@
-.bold-list li{
-    padding:2px 0;
+.bold-list li {
     border-bottom:1px solid #dcdcdc;
     position:relative;
-    zoom:1;
+    zoom: 1;
     padding: 3px 15px;
 }
 
 .bold-list li:hover, .bold-list li:hover a {
     color: rgb(255, 255, 255);
+    text-decoration: none;
     text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.2);
     background-color: rgb(0, 136, 204);
+}
+
+.bold-list li a {
+    display: block;
+}
+
+.bold-list li a.close {
+    position: absolute;
+    right: 5px;
+    top: 2px;
 }
 
 .board-title h3 {
