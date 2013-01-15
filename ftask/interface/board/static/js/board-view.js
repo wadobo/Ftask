@@ -110,12 +110,10 @@
             });
             BoardView.syncLock = false;
         }
-        // TODO move to collection post fetch
-        //BoardView.resizeBoard();
     }
 
     BoardView.resizeBoard = function() {
-        var size = ($(window).height() - $(".board").offset().top - 40);
+        var size = ($(window).height() - $(".board").offset().top - 30);
         $(".board").css("height",  size + "px");
 
         $(".cardoverflow").css("height", "auto");
