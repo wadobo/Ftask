@@ -1,3 +1,12 @@
+.short-padding {
+    padding-left: 10px;
+    padding-right: 0;
+}
+
+.right-menu {
+    padding-right: 10px;
+}
+
 .bold-list li {
     border-bottom:1px solid #dcdcdc;
     position:relative;
@@ -22,6 +31,10 @@
     top: 2px;
 }
 
+.board-header {
+    margin-top: -17px;
+}
+
 .board-title h3 {
     display: inline-block;
 }
@@ -32,11 +45,12 @@
 }
 
 .board-buttons button {
-    width: 150px;
+    width: 100%;
     margin-bottom: 10px;
 }
 
 .board {
+    width: 100%;
     background-color: #393939;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
@@ -67,7 +81,7 @@
 @media (min-width: 480px) {
     .list {
         float: left;
-        width: 180px;
+        width: 210px;
     }
 }
 

@@ -75,7 +75,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         {% endblock %}
 
         {% block precontainer %}
-        <div class="container">
+        <div class="{% block containerclass %}container{% endblock %}">
         <header id="header">
         {% block header %}
         {% endblock %}
