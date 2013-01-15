@@ -8,6 +8,8 @@
 {% include "navbar.html" %}
 {% endblock %}
 
+{% block prefooter %}{% endblock %}
+
 {% block content %}
 {{ csrf_token()|safe }}
 
@@ -121,7 +123,7 @@
 </div>
 <div class="row-fluid">
     <!-- board -->
-    <div class="span10">
+    <div class="span10 board-parent">
         <div class="board">
             <div id="list-list">
             </div>
@@ -130,23 +132,34 @@
 
     <!-- right menu -->
     <div class="span2 right-menu">
-        <h4>Members</h4>
-            <div class="member-lists">
-                <ul class="inline admin"> </ul>
-                <ul class="inline members"> </ul>
-            </div>
-            <div class="board-buttons">
-            <button class="btn" data-toggle="modal" data-target="#member-modal"><i class="icon-user"></i> Add Members</button>
-            </div>
-        <h4>Board</h4>
-            <div class="board-buttons">
-            <button class="btn" data-toggle="modal" data-target="#modal"><i class="icon-list"></i> Add List</button>
-            <button class="btn"><i class="icon-wrench"></i> Options</button>
-            </div>
-        <h4>Activity</h4>
+        <div class="top-menu">
+            <h4>Members</h4>
+                <div class="member-lists">
+                    <ul class="inline admin"> </ul>
+                    <ul class="inline members"> </ul>
+                </div>
+                <div class="board-buttons">
+                <button class="btn" data-toggle="modal" data-target="#member-modal"><i class="icon-user"></i> Add Members</button>
+                </div>
+            <h4>Board</h4>
+                <div class="board-buttons">
+                <button class="btn" data-toggle="modal" data-target="#modal"><i class="icon-list"></i> Add List</button>
+                <button class="btn"><i class="icon-wrench"></i> Options</button>
+                </div>
+                <h4>Activity</h4>
+        </div>
+        <div class="activity">
+            <!-- TODO: show activity here -->
+        </div>
+        <footer>
+            <a href="http://wadobo.com">
+                <img id="danigm" alt="powered by wadobolabs" src="/static/img/wadobolabs.png">
+            </a>
+            <a href="https://github.com/wadobo/Ftask">code</a>
+        </footer>
     </div>
 
-</div><!-- row -->
+</div><!-- row-fluid -->
 
 {% endblock %}
 

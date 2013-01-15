@@ -86,6 +86,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         {% endblock %}
         </section>
 
+        {% block prefooter %}
         <footer id="footer">
         {% block footer %}
         {% endblock %}
@@ -98,7 +99,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                            <a href="http://flask.pocoo.org/">Flask</a>,
                            <a href="http://backbonejs.org/">Backbone</a>,
                            <a href="http://http://twitter.github.com/bootstrap/">Twitter Bootstrap</a>
-                <br>Licenced under AGPLv3, get the <a href="https://github.com/danigm/Ftask">code</a>
+                <br>Licenced under AGPLv3, get the <a href="https://github.com/wadobo/Ftask">code</a>
                 </p>
                 <a href="http://wadobo.com">
                     <img id="danigm" alt="powered by wadobolabs" src="/static/img/wadobolabs.png">
@@ -107,6 +108,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </div>
 
         </footer>
+        {% endblock %}
+
         </div>
         {% endblock %}
 

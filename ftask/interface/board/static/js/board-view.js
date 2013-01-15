@@ -121,6 +121,7 @@
         if ($(window).width() <= 480) {
             $("#list-list").css("width", "auto");
         } else {
+            $(".right-menu").css("height", $(".board").height());
             var width = ($(".list").length) * ($(".list").width() + 13);
             $("#list-list").css("width", width + "px");
 
@@ -129,6 +130,10 @@
                 if ($(this).height() > cardSize)
                     $(this).css("height",  cardSize + "px");
             });
+
+            // activity size
+            var activity_height = size - $("footer").height() - $(".top-menu").height();
+            $(".activity").css("height", activity_height + "px");
         }
     }
 
