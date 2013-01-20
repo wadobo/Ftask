@@ -123,6 +123,31 @@
 
             this.$el.click(function() {
                 Task.Modal.taskModal(model);
+                return false;
+            });
+
+            this.$el.find('.dropdown-toggle').click(function() {
+                var dropdown = $("#task-dropdown");
+                dropdown.show();
+                dropdown.css('position', 'absolute');
+                dropdown.css('top', $(this).offset().top);
+                dropdown.css('left', $(this).offset().left - 100);
+                dropdown.mouseleave(function() {
+                    $(this).hide();
+                });
+
+                dropdown.find(".task-assign").unbind('click').click(function() {
+                    Task.Modal.taskModalMembers(model);
+                    return true;
+                });
+
+                dropdown.find(".task-remove").unbind('click').click(function() {
+                    Task.Modal.taskRemove(model);
+                    dropdown.hide();
+                    return false;
+                });
+
+                return false;
             });
 
             return this;

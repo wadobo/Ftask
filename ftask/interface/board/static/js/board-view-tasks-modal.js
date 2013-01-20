@@ -14,7 +14,7 @@
         Modal.taskModalMembers(model);
 
         // remove action
-        taskModalRemoveAction(model);
+        Modal.taskModalRemoveAction(model);
     }
 
     taskModalDescription = function(model) {
@@ -86,21 +86,26 @@
         }
     }
 
-    taskModalRemoveAction = function(model) {
+    Modal.taskModalRemoveAction = function(model) {
         $('#task-modal').find(".remove-action").unbind('click').click(function() {
-            var token = $("#csrf_token").val();
-            var url = Ftask.baseApiBoard + '/' + BoardView.boardId + '/lists/' + model.get("listid") + '/tasks/' + model.id + '/';
-            var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
-            req.done(function(data) {
-            $('#task-modal').modal('hide');
-                BoardView.sync();
-                Ftask.updateCsrf();
-            });
-            req.fail(function(data) {
-                alert("ERROR");
-                Ftask.updateCsrf();
-            });
+            Modal.taskRemove(model);
             return false;
         });
     }
+
+    Modal.taskRemove = function(model) {
+        var token = $("#csrf_token").val();
+        var url = Ftask.baseApiBoard + '/' + BoardView.boardId + '/lists/' + model.get("listid") + '/tasks/' + model.id + '/';
+        var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
+        req.done(function(data) {
+            $('#task-modal').modal('hide');
+            BoardView.sync();
+            Ftask.updateCsrf();
+        });
+        req.fail(function(data) {
+            alert("ERROR:" + data);
+            Ftask.updateCsrf();
+        });
+    }
+
 }).call(this);

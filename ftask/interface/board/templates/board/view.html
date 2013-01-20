@@ -161,6 +161,16 @@
 
 </div><!-- row-fluid -->
 
+<!-- task dropdown menu -->
+<ul id="task-dropdown" class="dropdown-menu">
+    <li><a href="#" class="task-remove"><i class="icon-remove"></i> Remove</a></li>
+    <li>
+    <a href="#" class="task-assign dropdown-toggle" data-toggle="dropdown"><i class="icon-user"></i> Assign</a>
+    <ul class="dropdown-menu allmembers">
+    </ul>
+    </li>
+</ul>
+
 {% endblock %}
 
 {% block scripts %}
@@ -206,7 +216,11 @@
     </script>
 
     <script type="text/template" id="task-template">
+        <div class="pull-right">
+            <a href="#" class="dropdown-toggle"><i class=" icon-chevron-down"></i></a>
+        </div>
         <span class="description"><%- description %></span>
+        <div class="clear"></div>
         <ul class="pull-right inline onetaskmembers"> </ul>
         <div class="clear"></div>
     </script>
