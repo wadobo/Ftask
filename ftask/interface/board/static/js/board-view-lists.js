@@ -158,7 +158,7 @@
                 var o1 = ui.draggable;
                 if (o1.hasClass("task")) {
                     $(this).find(".cards").prepend(o1);
-                } else {
+                } else if (o1.hasClass("list")) {
                     var o2 = $(this);
                     if (o2.offset().left < o1.offset().left) {
                         o1.insertBefore(o2);

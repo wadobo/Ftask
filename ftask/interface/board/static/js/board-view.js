@@ -52,7 +52,6 @@
         template: _.template($('#miniuser-template').html()),
 
         initialize: function() {
-            this.listenTo(this.model, 'change', this.render);
             this.listenTo(this.model, 'destroy', this.remove);
         },
 
@@ -60,6 +59,8 @@
             var m = this.model;
             var img = $.gravatar(m.get("email"), {'size': 30});
             this.$el.html(this.template({user: m.get("username"), url: img.attr("src")}));
+            this.$el.data('user', m.get('username'));
+            this.$el.addClass('member');
             if (m.get("role") === "admin") {
                 this.$el.find(".remove").remove();
             } else {
@@ -77,11 +78,15 @@
 
     BoardView.members.on("add", function(l) {
         var view = new BoardView.MemberView({model: l});
+        var el = $(view.render().el);
+
         if (l.get("role") === "admin") {
-            $(".admin").append(view.render().el);
+            $(".admin").append(el);
         } else {
-            $(".members").append(view.render().el);
+            $(".members").append(el);
         }
+
+        makeMemberDraggable(el);
         BoardView.memberViews.push(view);
     });
     BoardView.members.on("remove", function(l) {
@@ -140,6 +145,34 @@
     $(window).resize(function() {
         BoardView.resizeBoard();
     });
+
+    // Member drag & drop
+    function makeMemberDraggable(el) {
+        $(el).draggable({
+            handle: ".header",
+            cursor: "move",
+            start: dragMemberStart,
+            stop: dragMemberStop,
+            helper: dragMemberHelper
+        });
+    }
+
+    // list drag function
+    function dragMemberHelper(e) {
+        var helper = $(this).clone();
+        helper.addClass("dragging");
+        return helper;
+    }
+
+    function dragMemberStart(e, ui) {
+        $(this).addClass("dragging-freeze");
+        BoardView.syncLock = true;
+    }
+
+    function dragMemberStop(e, ui) {
+        $(this).removeClass("dragging-freeze");
+        BoardView.syncLock = false;
+    }
 
 }).call(this);
 

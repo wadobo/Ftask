@@ -213,6 +213,7 @@
 
         $(el).droppable({
             over: dropTaskOver,
+            drop: dropMember,
         });
     }
 
@@ -263,6 +264,25 @@
         var o2 = $(this);
         if (o1.hasClass("task")) {
             o1.insertAfter(o2);
+        }
+    }
+
+    function dropMember(e, ui) {
+        var o1 = ui.draggable;
+        var o2 = $(this);
+        var username = o1.data('user');
+        var tid = o2.attr("id");
+        if (o1.hasClass("member")) {
+            // finding the task
+            var t = null;
+            _.each(Task.collections, function(c) {
+                var t1 = c.find(function(x) { return x.id == tid });
+                if (t1) {
+                    t = t1;
+                }
+            });
+            if (t)
+                Task.assign(t, username);
         }
     }
 }).call(this);
