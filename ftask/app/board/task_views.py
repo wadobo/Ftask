@@ -61,12 +61,14 @@ view_list_tasks.path = '/<boardid>/lists/<listid>/tasks/'
 def new_list_task(boardid, listid):
     c = get_db().tasks
     description = request.form['description']
+    due_date = request.form['due_date']
     order = c.find({'boardid': boardid, 'listid': listid}).count()
 
     t = {
         'boardid': boardid,
         'listid': listid,
         'description': description,
+        'due_date' : due_date,
         'order': order,
     }
 

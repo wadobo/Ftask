@@ -21,6 +21,7 @@
         var l = _.find(BoardView.List.collection.models, function(v) { return v.id === model.get("listid") });
         // setting task attributes
         $('#task-modal').find(".taskname").html(model.get("description"));
+	$('#task-modal').find(".taskduedate").html(model.get("due_date"));
         $('#task-modal').find(".listname").html(l.get("name"));
 
         var nf = $('#task-modal').find(".name-form");
