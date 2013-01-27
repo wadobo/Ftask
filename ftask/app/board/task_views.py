@@ -55,6 +55,20 @@ def view_list_tasks(boardid, listid):
                    objects=objs)
 view_list_tasks.path = '/<boardid>/lists/<listid>/tasks/'
 
+@authenticated
+@can_view_board
+def view_list_dates(boardid, listid):
+    max_date = get_db().tasks.find({'boardid': boardid,
+                                    'listid': listid}).sort('due_date',
+                                                            -1).limit(1)
+
+    min_date = get_db().tasks.find({'boardid': boardid,
+                                    'listid': listid}).sort('due_date',
+                                                            1).limit(1)    
+
+    return jsonify(min_date=min_date.next()['due_date'],
+                   max_date=max_date.next()['due_date'])
+view_list_dates.path = "/<boardid>/lists/<listid>/tasks/dates/"
 
 @authenticated
 @can_view_board

@@ -61,6 +61,7 @@ from .task_views import view_list_task
 from .task_views import new_list_task
 from .task_views import assign_task
 from .task_views import unassign_task
+from .task_views import view_list_dates
 
 board.add_url_rule(view_board_tasks.path, 'tasks', view_board_tasks)
 board.add_url_rule(view_list_tasks.path, 'list_tasks', view_list_tasks)
@@ -68,3 +69,4 @@ board.add_url_rule(view_list_task.path, 'view_task', view_list_task)
 board.add_url_rule(new_list_task.path, 'new_task', new_list_task)
 board.add_url_rule(assign_task.path, 'assign_task', assign_task)
 board.add_url_rule(unassign_task.path, 'unassign_task', unassign_task)
+board.add_url_rule(view_list_dates.path, 'tasks_by_dates', view_list_dates)

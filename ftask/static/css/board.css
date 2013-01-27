@@ -3,6 +3,24 @@
     padding-right: 0;
 }
 
+.pop-container {
+    height: 50px;
+    float: right;
+}
+
+.fr {
+    float: right;
+}
+
+#dialog-confirm { 
+    display: none;
+    height: 140px !important;
+}
+
+#dialog-confirm h1 { 
+   font-size: 12px;
+}
+
 .right-menu {
     padding-right: 10px;
 }

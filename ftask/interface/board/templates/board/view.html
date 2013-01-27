@@ -13,6 +13,12 @@
 {% block content %}
 {{ csrf_token()|safe }}
 
+<div id="dialog-confirm" title="Delete the list?">
+  <h1>Are you sure you want to delete the list?</h1>
+  <p class="text-warning">The tasks included in this list will be also permanently deleted and cannot be recovered later.</p>
+</div>
+
+
 <!-- member name modal -->
 <div id="member-modal" class="modal hide fade">
     <div class="modal-header">
@@ -202,6 +208,13 @@
                 </li>
             </ul>
         </li>
+    </script>
+
+    <script type="text/template" id="popover-template">
+	<div class="pop-container">
+		<button id="editlistname" type="button" class="btn fr">Edit list name</button>
+		<button type="button" class="btn fr">Filter tasks</button>
+	</div>
     </script>
 
     <script type="text/template" id="list-template">
