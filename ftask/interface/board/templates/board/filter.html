@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Board View{% endblock %}
+
+{% block containerclass %}container-fluid short-padding{% endblock %}
+
+{% block prehead %}
+{% include "navbar.html" %}
+{% endblock %}
+
+{% block prefooter %}{% endblock %}
+
+{% block content %}
+{{ csrf_token()|safe }}
+
+<div class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="#">Filter by</a>
+    <ul class="nav">
+      <li class="active"><a href="#">Due date</a></li>
+    </ul>
+    <ul class="nav pull-right">
+      <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+      Options
+      <b class="caret"></b>
+      </a>
+      <ul class="dropdown-menu">
+      <li>Expand to all the board</li>
+      <li class="divider"></li>
+      <li>Return to board view</li>
+      </ul></li>
+    </ul>
+  </div>
+</div>
+
+
+{% endblock %}

@@ -36,3 +36,8 @@ def list_board():
 @authenticated
 def view_board(boardid):
     return render_template('board/view.html', boardid=boardid)
+
+@boardi.route('/<boardid>/<listid>/filter', methods=['GET'])
+@authenticated
+def filter_board(boardid, listid):
+    return render_template('board/filter.html', boardid=boardid, listid=listid)

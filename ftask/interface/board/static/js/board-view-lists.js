@@ -78,6 +78,9 @@
 				List.editNameForm($(this).parent().parent(),
 						  model);
 			});
+			$("#filtertasks").click(function() {
+				window.location.href = "/board/" + BoardView.boardId + "/" + model.id + "/filter#date";
+			});
 		} else {
 			$(this).popover('hide');
 		}
