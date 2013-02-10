@@ -12,6 +12,15 @@
     float: right;
 }
 
+.date-limits { 
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.dinp { 
+   width: 75px;
+}
+
 #dialog-confirm { 
     display: none;
     height: 140px !important;

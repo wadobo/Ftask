@@ -58,17 +58,28 @@ view_list_tasks.path = '/<boardid>/lists/<listid>/tasks/'
 @authenticated
 @can_view_board
 def view_list_dates(boardid, listid):
-    max_date = get_db().tasks.find({'boardid': boardid,
-                                    'listid': listid}).sort('due_date',
-                                                            -1).limit(1)
+    if listid == "all":
+        query = {'boardid': boardid}
+    else:
+        query = {'boardid': boardid, 'listid': listid}
+        
+    max_date = get_db().tasks.find(query).sort('due_date', -1).limit(1)
+    min_date = get_db().tasks.find(query).sort('due_date', 1).limit(1)
 
-    min_date = get_db().tasks.find({'boardid': boardid,
-                                    'listid': listid}).sort('due_date',
-                                                            1).limit(1)    
-
-    return jsonify(min_date=min_date.next()['due_date'],
-                   max_date=max_date.next()['due_date'])
-view_list_dates.path = "/<boardid>/lists/<listid>/tasks/dates/"
+    meta = {}
+    
+    if max_date.count() == 0 or min_date.count() == 0:
+        meta['unlimited'] = 1
+    else:
+        meta['unlimited'] = 0
+    
+    objs = {
+        'min_date': None if min_date.count() == 0 else min_date.next()['due_date'],
+        'max_date': None if max_date.count() == 0 else max_date.next()['due_date'],
+        }
+    
+    return jsonify(meta=meta, objects=objs)
+view_list_dates.path = "/<boardid>/lists/<listid>/tasks/dates"
 
 @authenticated
 @can_view_board

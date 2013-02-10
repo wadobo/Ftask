@@ -1,3 +1,11 @@
+    function updateTaskOrder(lid) {
+        var obj = $("#"+ lid + " .task");
+        var sortedTasks = obj.sort(function(a, b) { return $(a).data("order") < $(b).data("order") ? -1 : 1 });
+        var cards = $("#"+ lid + " .cards");
+        cards.append(sortedTasks);
+    }
+
+
 (function() {
     var Task = this.BoardView.Task = {};
 
@@ -82,8 +90,9 @@
     // Backbone stuff
 
     Task.Task = Backbone.Model.extend({
-        idAttribute: "id"
+        idAttribute: "id",
     });
+
     Task.Tasks = Backbone.Collection.extend({
         model: Task.Task,
         parse: function(response) {
@@ -218,12 +227,6 @@
 
     // internal functions
 
-    function updateTaskOrder(lid) {
-        var obj = $("#"+ lid + " .task");
-        var sortedTasks = obj.sort(function(a, b) { return $(a).data("order") < $(b).data("order") ? -1 : 1 });
-        var cards = $("#"+ lid + " .cards");
-        cards.append(sortedTasks);
-    }
 
     // drag & drop
 
@@ -265,12 +268,15 @@
             var obj = $(l);
             if (!obj.hasClass("dragging")) {
                 var view = _.find(Task.views, function(v) { return v.model.id === obj.attr("id") });
-                view.model.set({"order": i, "listid": list.attr("id")}, {silent: true});
+		
+		list_id = list.attr("id") == "list-list" ? BoardFilteredView.listId : list.attr("id");
+
+                view.model.set({"order": i, "listid": list_id}, {silent: true});
                 view.$el.data("order", i);
 
                 var url = '/api/boards/' + BoardView.boardId + '/lists/'+list.attr("id")+'/tasks/'+view.model.id+'/';
                 var token = $("#csrf_token").val();
-                var data = {'_csrf_token': token, 'order': i, 'listid': list.attr("id")};
+                var data = {'_csrf_token': token, 'order': i, 'listid': list_id};
                 var req = $.ajax({url:url, data:data, type:"PUT"});
                 req.done(function(data) {
                     Ftask.updateCsrf();

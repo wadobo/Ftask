@@ -73,4 +73,29 @@
         });
     }
 
+    // Filters
+
+    Ftask.Filters = {
+	filterNone: function (task) {
+	    return true;
+	},
+
+	filterByDate: function (task) {
+	    var min_date = new Date($("#min_date").val());
+	    var max_date = new Date($("#max_date").val());
+
+	    if(task.attributes.visibility == undefined) {
+		task.attributes.visibility = true;
+	    }
+
+	    dueDate = new Date(task.attributes.due_date);
+
+	    if(dueDate >= min_date && dueDate <= max_date)
+	    {
+		return true;
+	    } else {
+		return false;
+	    }
+	}
+    };
 }).call(this);
