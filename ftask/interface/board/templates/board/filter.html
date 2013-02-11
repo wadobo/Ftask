@@ -123,6 +123,7 @@
 <script type="text/javascript">
 	BoardFilteredView.listId = "{{ listid }}";
 	BoardFilteredView.sync();
+        setInterval(BoardFilteredView.filterLists,1000);
 </script>
 {% endblock %}
 

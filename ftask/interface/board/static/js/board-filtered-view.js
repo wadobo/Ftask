@@ -3,7 +3,7 @@ _.extend(BoardFilteredView, this.BoardView);
 
 BoardFilteredView.dateReport = {};
 
-BoardFilteredView.List.ListView = BoardView.List.ListView.extend({
+/*BoardFilteredView.List.ListView = BoardView.List.ListView.extend({
     render: function() {
 	if( BoardFilteredView.listId == this.model.attributes.id)
 	{
@@ -17,7 +17,7 @@ BoardFilteredView.List.ListView = BoardView.List.ListView.extend({
 	    return "";
 	}
     }
-});
+});*/
 
 BoardFilteredView.Task.TaskView = BoardView.Task.TaskView.extend({
     render: function() {
@@ -68,26 +68,19 @@ BoardFilteredView.Task.TaskView = BoardView.Task.TaskView.extend({
 });
 
 BoardFilteredView.filter = function (callback) {
-    BoardFilteredView.Task.collections.forEach( function(list) {
-	if(BoardFilteredView.listId == false ||
-	   BoardFilteredView.listId == list.lurl) {
+    BoardFilteredView.Task.views.forEach(function(v) {
+	v.el.hidden = callback(v.model);
+    });
+}
 
-	    list.fetch({
-		update: true,
-		success : function (col, resp, opt) {
-		    newTasks = []
 
-		    col.forEach( function (task) {
-			if(callback(task) == true)
-			{
-			    newTasks.push(task);
-			}
-		    });
-
-		    col.update(newTasks);
-		    updateTaskOrder(list.lurl);
-		},
-	    });
+BoardFilteredView.filterLists = function (callback) {
+    BoardFilteredView.List.views.forEach(function(v) {
+	if(v.model.id == BoardFilteredView.listId ||
+	   (BoardFilteredView.listId == false && BoardFilteredView.countedTasks[v.model.id])) {
+	    v.el.hidden = false;
+	} else {
+	    v.el.hidden = true;
 	}
     });
 }
@@ -121,7 +114,7 @@ function generateQuickReport() {
     var bar_today = "<div class='bar bar-warning' style='width: #%;'></div>";
 
     var overdue, onSchedule, thisWeek, today;
-    
+
     if(BoardFilteredView.listId == false)
     {
 	overdue = 0; 
@@ -197,6 +190,7 @@ function handleRouteDate() {
     var req = $.ajax({url:url, data:data});
 
     req.done(function (data) {
+	BoardFilteredView.filterLists();
 	var template = _.template($("#date-filter-options").html())
 	var _data = {
 	    min_date: data.objects.min_date,
@@ -281,11 +275,8 @@ appFilters.on("route:all", function() {
 });
 
 $("#expandToAll").click(function () {
-    $("#board").html("");
     BoardFilteredView.listId = false;
     BoardFilteredView.countTasks();
-    BoardFilteredView.List.collection.reset();
-    BoardFilteredView.sync();
     handleRouteDate();
 });
 
