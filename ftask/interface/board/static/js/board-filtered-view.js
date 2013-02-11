@@ -5,11 +5,15 @@ BoardFilteredView.dateReport = {};
 
 BoardFilteredView.List.ListView = BoardView.List.ListView.extend({
     render: function() {
-	if(BoardFilteredView.listId == false || 
-	   BoardFilteredView.listId == this.model.attributes.id)
+	if( BoardFilteredView.listId == this.model.attributes.id)
 	{
 	    return this.constructor.__super__.render.apply(this);
-	} else {
+	} else if (BoardFilteredView.listId == false && 
+		   BoardFilteredView.countedTasks[this.model.attributes.id] > 0)
+	{
+	    return this.constructor.__super__.render.apply(this);
+	} else 
+	{
 	    return "";
 	}
     }
@@ -88,6 +92,13 @@ BoardFilteredView.filter = function (callback) {
     });
 }
 
+BoardFilteredView.countedTasks = {};
+
+BoardFilteredView.countTasks = function () {
+    BoardFilteredView.Task.collections.forEach( function(list) {
+	BoardFilteredView.countedTasks[list.lurl] = list.length;
+    });
+}
 
 
 var FilterRouters = Backbone.Router.extend({
@@ -103,7 +114,70 @@ function uglyWayToGetListIdWhenDomIsNotReady() {
     return document.location.pathname.split('/')[3]
 }
 
-appFilters.on("route:date", function() {
+
+function generateQuickReport() {
+    var bar_thisWeek = "<div class='bar bar-success' style='width: #%;'></div>";
+    var bar_overdue = "<div class='bar bar-danger' style='width: #%;'></div>";
+    var bar_today = "<div class='bar bar-warning' style='width: #%;'></div>";
+
+    var overdue, onSchedule, thisWeek, today;
+    
+    if(BoardFilteredView.listId == false)
+    {
+	overdue = 0; 
+	onSchedule = 0; 
+	thisWeek = 0; 
+	today = 0;
+
+	for(var listId in BoardFilteredView.dateReport) {
+	    overdue += BoardFilteredView.dateReport[listId].overdue;
+	    onSchedule += BoardFilteredView.dateReport[listId].on_schedule;
+	    thisWeek += BoardFilteredView.dateReport[listId].this_week;
+	    today += BoardFilteredView.dateReport[listId].today;
+	}
+    } else {
+	overdue = BoardFilteredView.dateReport[BoardFilteredView.listId].overdue;
+	onSchedule = BoardFilteredView.dateReport[BoardFilteredView.listId].on_schedule;
+	thisWeek = BoardFilteredView.dateReport[BoardFilteredView.listId].this_week;
+	today = BoardFilteredView.dateReport[BoardFilteredView.listId].today; 
+    }
+
+    totalTasks = overdue + onSchedule + thisWeek + today;
+
+    overduePerc = Math.round((overdue / totalTasks)*100);
+    todayPerc = Math.round((today / totalTasks)*100);
+    thisWeekPerc = Math.round((thisWeek / totalTasks)*100);
+
+
+    bar_thisWeek = bar_thisWeek.replace('#', thisWeekPerc);
+    bar_overdue = bar_overdue.replace('#', overduePerc);
+    bar_today = bar_today.replace('#', todayPerc);
+
+    $(".progress").html(bar_thisWeek + bar_today + bar_overdue);
+    
+    if(overdue > 0) {
+	$("#delayedQty").html(overdue + " tasks are delayed.");
+    }
+
+    if(onSchedule > 0) {
+	$("#othersQty").html(onSchedule + " tasks has a long term (more than a week) due date.");
+    }
+
+    if(today > 0) {
+	$("#todayQty").html(today + " tasks should be closed today.");
+    }
+
+    if(thisWeek > 0) {
+	$("#weekQty").html(thisWeek + " tasks are due for this week.");
+    }
+
+
+    clearInterval(BoardFilteredView.reportInterval);
+
+}
+
+
+function handleRouteDate() {
     var listId;
 
     BoardFilteredView.activeNav = $("#dateNav");
@@ -144,8 +218,8 @@ appFilters.on("route:date", function() {
 	$("#overdueTasks").click(function () {
 	    var today = new Date();
 	    var yesterday = new Date(today.getFullYear(),
-				today.getMonth(),
-				today.getDate() - 1);
+				     today.getMonth(),
+				     today.getDate() - 1);
 
 	    $("#min_date").val($("#min_date_js").val());
 	    $("#max_date").val(yesterday.getMonth() + 1 + "/" +
@@ -171,8 +245,8 @@ appFilters.on("route:date", function() {
 	    var today = new Date();
 	    today.setDate(today.getDate() + 1);
 	    var nextWeek = new Date(today.getFullYear(),
-				today.getMonth(),
-				today.getDate() + 7);
+				    today.getMonth(),
+				    today.getDate() + 7);
 
 	    $("#min_date").val(today.getMonth() + 1 + "/" +
 			       (today.getDate()) + "/" +
@@ -186,47 +260,8 @@ appFilters.on("route:date", function() {
 
 	/* FIXME: A quite ugly way to wait until all the views are rendered for 
 	   the first time. */
-	BoardFilteredView.reportInterval = setInterval(function () {
-	    var bar_thisWeek = "<div class='bar bar-success' style='width: #%;'></div>";
-	    var bar_overdue = "<div class='bar bar-danger' style='width: #%;'></div>";
-	    var bar_today = "<div class='bar bar-warning' style='width: #%;'></div>";
-	    var overdue = BoardFilteredView.dateReport[BoardFilteredView.listId].overdue;
-	    var onSchedule = BoardFilteredView.dateReport[BoardFilteredView.listId].on_schedule;
-	    var thisWeek = BoardFilteredView.dateReport[BoardFilteredView.listId].this_week;
-	    var today = BoardFilteredView.dateReport[BoardFilteredView.listId].today; 
-
-	    totalTasks = overdue + onSchedule + thisWeek + today;
-
-	    overduePerc = Math.round((overdue / totalTasks)*100);
-	    todayPerc = Math.round((today / totalTasks)*100);
-	    thisWeekPerc = Math.round((thisWeek / totalTasks)*100);
-
-
-	    bar_thisWeek = bar_thisWeek.replace('#', thisWeekPerc);
-	    bar_overdue = bar_overdue.replace('#', overduePerc);
-	    bar_today = bar_today.replace('#', todayPerc);
-
-	    $(".progress").html(bar_thisWeek + bar_today + bar_overdue);
-	    
-	    if(overdue > 0) {
-		$("#delayedQty").html(overdue + " tasks are delayed.");
-	    }
-
-	    if(onSchedule > 0) {
-		$("#othersQty").html(onSchedule + " tasks has a long term (more than a week) due date.");
-	    }
-
-	    if(today > 0) {
-		$("#todayQty").html(today + " tasks should be closed today.");
-	    }
-
-	    if(thisWeek > 0) {
-		$("#weekQty").html(thisWeek + " tasks are due for this week.");
-	    }
-
-
-	    clearInterval(BoardFilteredView.reportInterval);
-	}, 1000);
+	BoardFilteredView.reportInterval = setInterval(generateQuickReport,
+						       1000);
 
     });
 
@@ -234,12 +269,24 @@ appFilters.on("route:date", function() {
 	alert("ERROR");
     });
 
-});
+}
+
+
+appFilters.on("route:date", handleRouteDate );
 
 appFilters.on("route:all", function() {
     $("#filter-options").html("");
     BoardFilteredView.activeNav.removeClass('active');
     BoardFilteredView.filter(Ftask.Filters.filterNone);
+});
+
+$("#expandToAll").click(function () {
+    $("#board").html("");
+    BoardFilteredView.listId = false;
+    BoardFilteredView.countTasks();
+    BoardFilteredView.List.collection.reset();
+    BoardFilteredView.sync();
+    handleRouteDate();
 });
 
 

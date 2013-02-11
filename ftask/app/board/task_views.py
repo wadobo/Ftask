@@ -26,7 +26,7 @@ from .board_views import get_board_by_id
 from .board_views import can_view_board
 
 from bson.objectid import ObjectId
-
+from datetime import datetime
 
 @authenticated
 @can_view_board
@@ -62,7 +62,7 @@ def view_list_dates(boardid, listid):
         query = {'boardid': boardid}
     else:
         query = {'boardid': boardid, 'listid': listid}
-        
+
     max_date = get_db().tasks.find(query).sort('due_date', -1).limit(1)
     min_date = get_db().tasks.find(query).sort('due_date', 1).limit(1)
 
@@ -72,10 +72,11 @@ def view_list_dates(boardid, listid):
         meta['unlimited'] = 1
     else:
         meta['unlimited'] = 0
+
     
     objs = {
-        'min_date': None if min_date.count() == 0 else min_date.next()['due_date'],
-        'max_date': None if max_date.count() == 0 else max_date.next()['due_date'],
+        'min_date': None if min_date.count() == 0 else min_date.next()['due_date'].isoformat(),
+        'max_date': None if max_date.count() == 0 else max_date.next()['due_date'].isoformat(),
         }
     
     return jsonify(meta=meta, objects=objs)
@@ -86,14 +87,14 @@ view_list_dates.path = "/<boardid>/lists/<listid>/tasks/dates"
 def new_list_task(boardid, listid):
     c = get_db().tasks
     description = request.form['description']
-    due_date = request.form['due_date']
+    (m, d, y) = request.form['due_date'].split('/')
     order = c.find({'boardid': boardid, 'listid': listid}).count()
 
     t = {
         'boardid': boardid,
         'listid': listid,
         'description': description,
-        'due_date' : due_date,
+        'due_date' : datetime(int(y), int(m), int(d)),
         'order': order,
     }
 

@@ -26,7 +26,7 @@
       <b class="caret"></b>
       </a>
       <ul class="dropdown-menu">
-      <li>Expand to all the board</li>
+      <li><a id="expandToAll">Expand to all the board</a></li>
       <li class="divider"></li>
       <li><a href="/board/{{ boardid }}">Return to board view</a></li>
       </ul></li>
@@ -72,7 +72,12 @@
 </script>
 
 <script type="text/template" id="list-template">
-	<div class="cards"></div>
+	<div class="header">
+	  <span class="name"><%- name %></span>
+	</div>
+	<div class="cardoverflow">
+            <div class="cards"></div>
+        </div>
 </script>
 
 <script type="text/template" id="date-filter-options">

@@ -263,12 +263,17 @@
 
         // Change model order attr and update
         var list = $(this).parent().parent().parent();
+
         var tasks = list.find(".task");
         tasks.each(function(i, l) {
             var obj = $(l);
             if (!obj.hasClass("dragging")) {
                 var view = _.find(Task.views, function(v) { return v.model.id === obj.attr("id") });
-		
+
+		/* FIXME: By modifying the list template in the filter view, 
+		   it's very likely that the list-list check won't be required 
+		   any more. Remove in future updates */
+		   
 		list_id = list.attr("id") == "list-list" ? BoardFilteredView.listId : list.attr("id");
 
                 view.model.set({"order": i, "listid": list_id}, {silent: true});
