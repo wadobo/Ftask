@@ -265,6 +265,9 @@ function handleRouteDate() {
 
 }
 
+BoardFilteredView.List.collection.on("sync", function () {
+    BoardFilteredView.filterLists();
+});
 
 appFilters.on("route:date", handleRouteDate );
 
