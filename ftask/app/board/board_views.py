@@ -42,6 +42,16 @@ def can_view_board(view):
     return deco_view
 
 
+def can_view_assigned(view):
+    @wraps(view)
+    def deco_view(userid, *args, **kwargs):
+        if not userid == g.user['username']:
+            raise abort(401)
+
+        return view(userid, *args, **kwargs)
+    
+    return deco_view
+
 @authenticated
 def list_boards():
     boards = get_db().boards.find({'user': g.user['username']}).sort([('name', 1)])

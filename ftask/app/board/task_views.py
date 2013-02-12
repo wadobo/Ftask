@@ -23,7 +23,7 @@ from flask import g
 from ..db import get_db, to_json
 from ..auth.decorators import authenticated
 from .board_views import get_board_by_id
-from .board_views import can_view_board
+from .board_views import can_view_board, can_view_assigned
 
 from bson.objectid import ObjectId
 from datetime import datetime
@@ -41,6 +41,18 @@ def view_board_tasks(boardid):
                    objects=objs)
 view_board_tasks.path = '/<boardid>/tasks/'
 
+@authenticated
+@can_view_assigned
+def assigned_tasks(userid):
+    c = get_db().tasks
+    t = c.find({'assign' : userid})
+
+    meta = {'total' : t.count()}
+
+    objs = [to_json(i) for i in t]
+
+    return jsonify(meta=meta, objects=objs)
+assigned_tasks.path = '/assigned/<userid>'
 
 @authenticated
 @can_view_board
