@@ -28,6 +28,9 @@
         var header = $('#task-modal').find(".header");
         var ta = nf.find("textarea");
         ta.val(model.get("description"));
+	var dd = nf.find("[name=due_date]");
+	dd.val(model.get("due_date"));
+
         nf.hide();
 
         $('#task-modal').find(".taskname").unbind('click').click(function() {
@@ -40,10 +43,11 @@
                             alert("ERROR");
                        },
                        function(data) {
-                            BoardView.sync();
-                            $('#task-modal').find(".taskname").html(ta.val());
-                            nf.hide();
-                            header.show();
+                           BoardView.sync();
+                           $('#task-modal').find(".taskname").html(ta.val());
+			   $('#task-modal').find(".taskduedate").html(dd.val());
+                           nf.hide();
+                           header.show();
                        });
         });
 
