@@ -27,6 +27,8 @@ from app.board.views import board
 from interface.auth.views import authi
 from interface.board.views import boardi
 
+from werkzeug.serving import run_simple
+from sys import argv
 
 # configuration
 DEBUG = True
@@ -63,4 +65,8 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run()
+    if argv[1] == "--i-want-to-put-my-host-on-danger" and argv[2] == "--allow-clients-to-execute-python-on-the-machine":
+        run_simple(argv[3], int(argv[4]), app, use_reloader=True)
+    else:
+        app.run()
+
