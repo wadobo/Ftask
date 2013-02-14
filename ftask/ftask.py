@@ -83,8 +83,7 @@ if __name__ == "__main__":
             if not (int(argv[4]) > 0 and int(argv[4]) < 65536):
                 raise Exception
             
-        except Exception as excp:
-            print excp
+        except:
             print "Invalid %s\n" % err_msg
             print "usage " + argv[0] + " --i-want-to-put-my-host-on-danger --allow-clients-to-execute-python-on-the-machine [EXTERNAL IP or 0.0.0.0] [PORT]"
 
