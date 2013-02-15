@@ -98,4 +98,96 @@
 	    }
 	}
     };
+
+
+    // Date handling functions
+    Date.fromLocaleDateString = function (date) {
+	if(typeof date != "string") {
+	    throw new TypeError("date must be a string");
+	}
+
+	parsed_date = {};
+
+	locale_date = new Date(1988, 7, 20).toLocaleDateString();
+
+	/*
+	  The next statement seems to only work OK on Firefox and Google Chrome,
+	  wich returns a string of the type XX/YY/ZZ where XX, YY and ZZ values
+	  depends on user locale. 
+
+	  IE not tested.
+
+	  Works on mobile version of Firefox Beta.
+
+	  Tested on es-ES and en-EN locales
+
+	*/
+
+	example_date = locale_date.split('/');
+
+	if(example_date.length == 1) 
+	{
+	    // This is a fix for all the browser wich doesn't take in account 
+	    // the locales in my computer (a.k.a. Opera) or give the answer
+	    // in other format than the specified above (a.k.a Opera and 
+	    // older versions of Google Chrome).
+
+	    junk_date = locale_date.split(/ |,/);
+	    
+	    example_date = junk_date.map(function (i) {
+		if(i == 20) {
+		    return 20;
+		} else if (i == 1988) {
+		    return 1988;
+		} else if (i.match(/[A|a]ug/)) {
+		    return 8;
+		}
+	    }).filter(Number);
+
+	    // If still is not able to find 3 valid tokens, default's to ISO
+	    // format
+
+	    if(example_date.length != 3) {
+		example_date = [1988, 8, 20];
+	    }
+	}
+
+	template = example_date.map(function (i) {
+	    if(i == 1988) {
+		return 'y';
+	    } else if (i == 8) {
+		return 'm';
+	    } else {
+		return 'd';
+	    }
+	});
+
+	input_date = date.split('/');
+
+	if(input_date.length != 3) {
+	    throw new SyntaxError("Invalid date");
+	}
+
+	parsed_date[template[0]] = input_date[0];
+	parsed_date[template[1]] = input_date[1];
+	parsed_date[template[2]] = input_date[2];
+
+	return new Date(parsed_date.y, parsed_date.m - 1, parsed_date.d);
+    }
+
+    Date.prototype.toPythonDateTime = function () {
+	if((this.getMonth() + 1) < 10){
+	    month = "0" + (this.getMonth() + 1);
+	} else {
+	    month = this.getMonth() + 1;
+	}
+	
+	if(this.getDate() < 10){
+	    day = "0" + this.getDate();
+	} else {
+	    day = this.getDate();
+	}
+	
+	return this.getFullYear() + "-" + month + "-" + day + "T00:00:00";
+    }
 }).call(this);
