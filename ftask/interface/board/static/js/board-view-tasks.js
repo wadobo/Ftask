@@ -6,6 +6,7 @@
     }
 
 
+
 (function() {
     var Task = this.BoardView.Task = {};
 
@@ -91,6 +92,21 @@
 
     Task.Task = Backbone.Model.extend({
         idAttribute: "id",
+	due_date: "due_date",
+
+	initialize: function (attrs) {
+	    this.due_date = new Date(this.attributes.due_date);
+	},
+
+	toJSON: function (options) {
+	    ret = _.clone(this.attributes);
+
+	    if(options != undefined && options.override_due_date) {
+		ret.due_date = this.due_date.toLocaleDateString();
+	    }
+
+	    return ret;
+	},
     });
 
     Task.Tasks = Backbone.Collection.extend({
@@ -122,7 +138,7 @@
         },
 
         render: function() {
-            this.$el.html(this.template(this.model.toJSON()));
+            this.$el.html(this.template(this.model.toJSON({override_due_date: true})));
             var model = this.model;
             this.$el.attr("id", model.id);
             this.$el.data("order", model.get("order"));
