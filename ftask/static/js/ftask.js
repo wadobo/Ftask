@@ -81,14 +81,14 @@
 	},
 
 	filterByDate: function (task) {
-	    var min_date = new Date($("#min_date").val());
-	    var max_date = new Date($("#max_date").val());
+	    var min_date = new Date($("#min_date").val() + "T00:00:00");
+	    var max_date = new Date($("#max_date").val() + "T00:00:00");
 
 	    /* if(task.attributes.visibility == undefined) {
 		task.attributes.visibility = true;
 	    } */
 
-	    dueDate = new Date(task.attributes.due_date);
+	    dueDate = task.due_date;
 
 	    if(dueDate >= min_date && dueDate <= max_date)
 	    {
@@ -101,6 +101,7 @@
 
 
     // Date handling functions
+
     Date.fromLocaleDateString = function (date) {
 	if(typeof date != "string") {
 	    throw new TypeError("date must be a string");
@@ -173,6 +174,44 @@
 	parsed_date[template[2]] = input_date[2];
 
 	return new Date(parsed_date.y, parsed_date.m - 1, parsed_date.d);
+    }
+
+    Date.today = new Date();
+
+    Date.yesterday = new Date(Date.today.getFullYear(),
+			      Date.today.getMonth(),
+			      Date.today.getDate() - 1);
+
+    Date.tomorrow = new Date(Date.today.getFullYear(),
+			     Date.today.getMonth(),
+			     Date.today.getDate() + 1);
+    
+
+    Date.nextWeek = new Date(Date.tomorrow.getFullYear(),
+			     Date.tomorrow.getMonth(),
+			     Date.tomorrow.getDate() + 7);
+
+
+    Date.prototype.toISODateString = function () {
+	// I don't use .toISOString because the results may fool Ftask. Due to
+	// the time zone that the Date object automatically adds based on the 
+	// user's locale, the return of toISOString will be shifted some hours
+	// in order to adjust the returned string to the GMT hour, potentially
+	// returning an invalid day.
+
+	if((this.getMonth() + 1) < 10){
+	    month = "0" + (this.getMonth() + 1);
+	} else {
+	    month = this.getMonth() + 1;
+	}
+	
+	if(this.getDate() < 10){
+	    day = "0" + this.getDate();
+	} else {
+	    day = this.getDate();
+	}
+
+	return this.getFullYear() + "-" + month + "-" + day;
     }
 
     Date.prototype.toPythonDateTime = function () {

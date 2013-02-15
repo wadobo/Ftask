@@ -204,53 +204,38 @@ function handleRouteDate() {
 	});
 
 	$("#allTasks").click(function () {
-	    $("#min_date").val($("#min_date_js").val());
-	    $("#max_date").val($("#max_date_js").val());
+	    $("#min_date").val(new Date($("#min_date_js").val()).toISODateString());
+	    $("#max_date").val(new Date($("#max_date_js").val()).toISODateString());
 	    $("input[type=date]").change();
 	});
 
 	$("#overdueTasks").click(function () {
-	    var today = new Date();
-	    var yesterday = new Date(today.getFullYear(),
-				     today.getMonth(),
-				     today.getDate() - 1);
+	    min_date = new Date($("#min_date_js").val());
 
-	    $("#min_date").val($("#min_date_js").val());
-	    $("#max_date").val(yesterday.getMonth() + 1 + "/" +
-			       yesterday.getDate() + "/" +
-			       yesterday.getFullYear());
+	    $("#min_date").val(min_date.toISODateString());
+	    $("#max_date").val(Date.yesterday.toISODateString());
 	    $("input[type=date]").change();
 	});
 
 	$("#todayTasks").click(function () {
-	    var today = new Date();
+	    var today_str = Date.today.toISODateString();
 
 
-	    $("#min_date").val(today.getMonth() + 1 + "/" +
-			       today.getDate() + "/" +
-			       today.getFullYear());
-	    $("#max_date").val(today.getMonth() + 1 + "/" +
-			       today.getDate() + "/" +
-			       today.getFullYear());
+	    $("#min_date").val(today_str);
+	    $("#max_date").val(today_str);
 	    $("input[type=date]").change();
 	});
 
 	$("#thisWeekTasks").click(function () {
-	    var today = new Date();
-	    today.setDate(today.getDate() + 1);
-	    var nextWeek = new Date(today.getFullYear(),
-				    today.getMonth(),
-				    today.getDate() + 7);
+	    var tomorrow_str = Date.tomorrow.toISODateString();
+	    var nextWeek_str = Date.nextWeek.toISODateString();
 
-	    $("#min_date").val(today.getMonth() + 1 + "/" +
-			       (today.getDate()) + "/" +
-			       today.getFullYear());
-	    $("#max_date").val(nextWeek.getMonth() + 1 + "/" +
-			       nextWeek.getDate() + "/" +
-			       nextWeek.getFullYear());
+	    $("#min_date").val(tomorrow_str);
+	    $("#max_date").val(nextWeek_str);
 	    $("input[type=date]").change();
 	});
 
+	$("#allTasks").click();
 
 	/* FIXME: A quite ugly way to wait until all the views are rendered for 
 	   the first time. */
