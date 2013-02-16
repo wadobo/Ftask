@@ -21,17 +21,11 @@ BoardFilteredView.dateReport = {};
 
 BoardFilteredView.Task.TaskView = BoardView.Task.TaskView.extend({
     render: function() {
-	var Today = new Date();
-	var NextWeek = new Date(Today.getFullYear(),
-				Today.getMonth(),
-				Today.getDate() + 7);
-	var due_date = new Date(this.model.attributes.due_date);
+	var Today = Date.today;
+	var NextWeek = Date.nextWeek;
+
+	var due_date = Date.new(this.model.attributes.due_date);
 	var res;
-	
-	Today.setHours(0);
-	Today.setMilliseconds(0);
-	Today.setMinutes(0);
-	Today.setSeconds(0);
 
 	if(BoardFilteredView.dateReport[this.model.attributes.listid]
 	   == undefined)
@@ -204,13 +198,13 @@ function handleRouteDate() {
 	});
 
 	$("#allTasks").click(function () {
-	    $("#min_date").val(new Date($("#min_date_js").val()).toISODateString());
-	    $("#max_date").val(new Date($("#max_date_js").val()).toISODateString());
+	    $("#min_date").val(Date.new($("#min_date_js").val()).toISODateString());
+	    $("#max_date").val(Date.new($("#max_date_js").val()).toISODateString());
 	    $("input[type=date]").change();
 	});
 
 	$("#overdueTasks").click(function () {
-	    min_date = new Date($("#min_date_js").val());
+	    min_date = Date.new($("#min_date_js").val());
 
 	    $("#min_date").val(min_date.toISODateString());
 	    $("#max_date").val(Date.yesterday.toISODateString());

@@ -102,6 +102,16 @@
 
     // Date handling functions
 
+    Date.new = function(str) {
+	d = new Date(str);
+
+	if(isNaN(d.getTime())) {
+	    d = new Date(str + "Z");
+	}
+
+	return d;
+    }
+
     Date.fromLocaleDateString = function (date) {
 	if(typeof date != "string") {
 	    throw new TypeError("date must be a string");
@@ -177,6 +187,12 @@
     }
 
     Date.today = new Date();
+
+    Date.today.setHours(0);
+    Date.today.setMilliseconds(0);
+    Date.today.setMinutes(0);
+    Date.today.setSeconds(0);
+
 
     Date.yesterday = new Date(Date.today.getFullYear(),
 			      Date.today.getMonth(),

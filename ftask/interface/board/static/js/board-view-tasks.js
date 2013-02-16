@@ -95,7 +95,7 @@
 	due_date: "due_date",
 
 	initialize: function (attrs) {
-	    this.due_date = new Date(this.attributes.due_date);
+	    this.due_date = Date.new(this.attributes.due_date);
 	},
 
 	toJSON: function (options) {
