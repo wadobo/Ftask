@@ -21,6 +21,13 @@
    width: 120px;
 }
 
+.com_username { 
+   display: block;
+   margin-bottom: 2px;
+}
+
+
+
 #dialog-confirm { 
     display: none;
     height: 140px !important;

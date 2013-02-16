@@ -17,12 +17,32 @@
         Modal.taskModalRemoveAction(model);
     }
 
+    renderComments = function(model) {
+	var html_so_far = "";
+	var template = _.template($('#comment-template').html());
+
+	model.attributes.comments.forEach(function (comment) {
+	    u = comment['user'];
+
+	    var data = {
+		gravatar_src: $.gravatar(u["email"], {'size': 100}).attr("src"),
+		username: u['username'],
+		comment: comment['comment'],
+	    };
+
+	    html_so_far += template(data);
+	});
+
+	return html_so_far;
+    }
+
     taskModalDescription = function(model) {
         var l = _.find(BoardView.List.collection.models, function(v) { return v.id === model.get("listid") });
         // setting task attributes
         $('#task-modal').find(".taskname").html(model.get("description"));
 	$('#task-modal').find(".taskduedate").html(model.due_date.toLocaleDateString());
         $('#task-modal').find(".listname").html(l.get("name"));
+	$("#task-modal").find("#comments_board").html(renderComments(model));
 
         var nf = $('#task-modal').find(".name-form");
         var header = $('#task-modal').find(".header");

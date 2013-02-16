@@ -89,8 +89,11 @@
     </div>
     <div class="modal-body">
         <div class="row-fluid">
-            <div clss="span9 main">
-                <h4 class="header"><span class="taskname"></span> <span class="muted">in list <span class="listname text-info"></span></span><span class="taskduedate"></span></h4>
+            <div class="span9 main">
+                <h4 class="header">
+	           <span class="taskname"></span>
+	           <span class="taskduedate" style="display: block"></span>
+	           <span class="muted">in list <span class="listname text-info"></span></span></h4>
                 <form method="PUT" class="name-form" class="form" data-url="">
                     <div class="description">
                         <textarea name="description"></textarea> <br/>
@@ -98,6 +101,9 @@
                     </div>
                     <input class="btn btn-info" type="submit" value="Save"/>
                     <a href="#" class="close">&times;</a>
+                </form>
+		<form method="PUT" class="form" data-url="">
+		    <textarea style="width: 95%; height: 100%;" name="comment" placeholder="Type your comment here.."></textarea>
                 </form>
             </div>
             <div class="span3 menu">
@@ -113,6 +119,10 @@
                     </ul>
                 </div>
             </div>
+	    <div class="span12">
+	      <h3>Comments</h3>
+	      <div id="comments_board"></div>
+	    </div>
         </div>
     </div>
 </div>
@@ -253,6 +263,16 @@
             <input class="btn btn-info" type="submit" value="Add"/>
             <a href="#" class="close">&times;</a>
         </form>
+    </script>
+
+    <script type="text/template" id="comment-template">
+	<div class="comment-cls">
+	  <span class="span3"><img src="<%= gravatar_src %>'"/></span>
+	  <span class="com-cont span9">
+	      <span class="com_username text-info"><%= username %></span>
+	      <span class="com_content"><%= comment %></span>
+	  </span>
+	</div>
     </script>
 
     <!-- doubleclick list name update -->

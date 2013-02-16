@@ -213,6 +213,10 @@ def delete_task(task, user):
 def serialize_task(t):
     s = t.get('assign', [])
     t['assign'] = [to_json(u, excludes=['password']) for u in get_db().users.find({"username": {"$in": s}})]
+
+    c = t.get('comments', [])
+    t['comments'] = [{'user': e[0], 'comment' : e[1]} for e in [[to_json(get_db().users.find({'username': i['user']}).next(), excludes=['password']), i['content']] for i in c]]
+    
     serialized = to_json(t)
 
     return serialized
