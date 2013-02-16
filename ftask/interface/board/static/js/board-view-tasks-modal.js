@@ -21,7 +21,7 @@
         var l = _.find(BoardView.List.collection.models, function(v) { return v.id === model.get("listid") });
         // setting task attributes
         $('#task-modal').find(".taskname").html(model.get("description"));
-	$('#task-modal').find(".taskduedate").html(model.get("due_date"));
+	$('#task-modal').find(".taskduedate").html(model.due_date.toLocaleDateString());
         $('#task-modal').find(".listname").html(l.get("name"));
 
         var nf = $('#task-modal').find(".name-form");
@@ -29,7 +29,7 @@
         var ta = nf.find("textarea");
         ta.val(model.get("description"));
 	var dd = nf.find("[name=due_date]");
-	dd.val(model.get("due_date"));
+	dd.val(model.due_date.toISODateString());
 
         nf.hide();
 
@@ -45,10 +45,16 @@
                        function(data) {
                            BoardView.sync();
                            $('#task-modal').find(".taskname").html(ta.val());
-			   $('#task-modal').find(".taskduedate").html(dd.val());
+			   $('#task-modal').find(".taskduedate").html(Date.new(dd.val() + "T00:00:00.000").toLocaleDateString());
                            nf.hide();
                            header.show();
-                       });
+                       },
+		       function(data) {
+			   return $.param({
+			       description: ta.val(),
+			       due_date: dd.val() + "T00:00:00.000",
+			   });
+		       });
         });
 
         $('#task-modal').find(".close").unbind('click').click(function() {

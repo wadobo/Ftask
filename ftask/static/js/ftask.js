@@ -30,7 +30,7 @@
     }
 
     // Convert a html form in a ajax query to the api
-    Ftask.form = function (id, onerror, onsuccess) {
+    Ftask.form = function (id, onerror, onsuccess, serialize) {
 
         function done () {
             if ($("#csrf_token").length) {
@@ -39,9 +39,20 @@
             $("#loading").fadeOut();
         }
 
+	function default_serialize(data) {
+	    return data.serialize;
+	}
+
         $(id).unbind('submit').submit(function() {
             var url = $(id).data("url");
-            var data = $(id).serialize();
+
+	    if(typeof serialize != "function")
+	    {
+		var data = default_serialize($(id));
+	    } else {
+		var data = serialize($(id));
+	    }
+
             var method = $(id).attr("method");
 
             if ($("#csrf_token").length) {
@@ -50,7 +61,6 @@
 
             $("#loading").fadeIn();
             var req = $.ajax({url:url, data:data, type:method});
-
             // DONE
             req.done(function(data) {
                 var next = $(id).data("next");
@@ -244,6 +254,6 @@
 	    day = this.getDate();
 	}
 	
-	return this.getFullYear() + "-" + month + "-" + day + "T00:00:00";
+	return this.getFullYear() + "-" + month + "-" + day + "T00:00:00.000";
     }
 }).call(this);

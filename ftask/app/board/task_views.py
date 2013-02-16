@@ -198,8 +198,8 @@ def update_task(task, user, newdata):
         if k == "order":
             task[k] = int(v)
         elif k == "due_date":
-            (m, d, y) = request.form['due_date'].split('/')
-            task[k] = datetime(int(y), int(m), int(d))
+            task[k] = datetime.strptime(request.form['due_date'],
+                                        "%Y-%m-%dT%H:%M:%S.%f")
         else:
             task[k] = v
 
