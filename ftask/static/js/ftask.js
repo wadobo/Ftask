@@ -81,8 +81,8 @@
 	},
 
 	filterByDate: function (task) {
-	    var min_date = new Date($("#min_date").val() + "T00:00:00");
-	    var max_date = new Date($("#max_date").val() + "T00:00:00");
+	    var min_date = Date.new($("#min_date").val() + "T00:00:00");
+	    var max_date = Date.new($("#max_date").val() + "T00:00:00");
 
 	    /* if(task.attributes.visibility == undefined) {
 		task.attributes.visibility = true;
@@ -106,7 +106,8 @@
 	d = new Date(str);
 
 	if(isNaN(d.getTime())) {
-	    d = new Date(str + "Z");
+	    d = str.split('T')[0].split('-');
+	    d = new Date(d[0], d[1] - 1, d[2]);
 	}
 
 	return d;

@@ -12,6 +12,7 @@ can read below the current status on the most known browsers.
 - Firefox
     - Developed and tested continuously on Firefox Nigthly.
     - Works on 21.0a1
+    - Works on Firefox 8.0a2
     - Partially working on Firefox Mobile 19.0 (Filtering doesn't work)
 - Google Chrome/Chromium
     - Fully tested and working on version 26.0.1410.5 dev
@@ -24,7 +25,7 @@ can read below the current status on the most known browsers.
     - Not tested
 - Epiphany
     - Partially works on Epiphany 3.2.1 \[U.A.: AppleWebKit/535.4+\] (Issues 
-      Filter popover and date filtering)
+      with Filter popover)
 - Safari
     - Not tested
 - iPhone/iPad
