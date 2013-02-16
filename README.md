@@ -5,9 +5,9 @@ flask and mongodb in server part and backbone in client side.
 
 ## Supported browsers
 
-All the modern browsers are supported. However, due to the differences in browser's
-implementation, there could be some bugs on the implementation. You can read below 
-the current status on the most known browsers.
+All the modern browsers are supported. However, due to the differences in 
+browser's implementation, there could be some bugs on the implementation. You
+can read below the current status on the most known browsers.
 
 - Firefox
     - Developed and tested continuously on Firefox Nigthly.
@@ -24,7 +24,7 @@ the current status on the most known browsers.
     - Not tested
 - Epiphany
     - Partially works on Epiphany 3.2.1 \[U.A.: AppleWebKit/535.4+\] (Issues 
-      with Date handling and with Filter popover)
+      Filter popover and date filtering)
 - Safari
     - Not tested
 - iPhone/iPad
