@@ -13,7 +13,7 @@ can read below the current status on the most known browsers.
     - Developed and tested continuously on Firefox Nigthly.
     - Works on 21.0a1
     - Works on Firefox 8.0a2
-    - Partially working on Firefox Mobile 19.0 (Filtering doesn't work)
+    - Works on Firefox Mobile 19.0
 - Google Chrome/Chromium
     - Fully tested and working on version 26.0.1410.5 dev
 - Android
@@ -24,8 +24,8 @@ can read below the current status on the most known browsers.
 - Internet Explorer
     - Not tested
 - Epiphany
-    - Partially works on Epiphany 3.2.1 \[U.A.: AppleWebKit/535.4+\] (Issues 
-      with Filter popover)
+    - Works on Epiphany 3.2.1 \[U.A.: AppleWebKit/535.4+\] (Filter popover bad
+      rendered)
 - Safari
     - Not tested
 - iPhone/iPad
