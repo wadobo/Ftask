@@ -29,6 +29,33 @@
         });
     }
 
+    Ftask.csrf_ajax = function (options, done, fail) {
+        Ftask.loading(true);
+        var req = $.get(Ftask.baseApiAuth + '/csrf_token/', {}, function(data) {
+            var token = data.token;
+            if (options.data === undefined) {
+                options.data = {};
+            }
+            if (options.type === 'GET' || options.type === 'DELETE') {
+                options.url += '?_csrf_token=' + token;
+            } else {
+                options.data._csrf_token = token;
+            }
+
+            var req = $.ajax(options);
+            req.done(done);
+            if (fail === undefined) {
+                req.fail(function(data) {
+                    alert('ERROR');
+                });
+            } else {
+                req.fail(fail);
+            }
+
+            Ftask.loading(false);
+        });
+    }
+
     // Convert a html form in a ajax query to the api
     Ftask.form = function (id, onerror, onsuccess) {
 

@@ -57,16 +57,10 @@
     });
 
     BoardList.deleteBoard = function(url) {
-        var token = $("#csrf_token").val();
-        var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
-        req.done(function(data) {
-            BoardList.boards.fetch({update: true});
-            Ftask.updateCsrf();
-        });
-        req.fail(function(data) {
-            alert("ERROR");
-            Ftask.updateCsrf();
-        });
+        Ftask.csrf_ajax({url:url, type:"DELETE"},
+                        function (data) {
+                            BoardList.boards.fetch({update: true});
+                        });
     }
 
     BoardList.boards = new BoardList.Boards();
