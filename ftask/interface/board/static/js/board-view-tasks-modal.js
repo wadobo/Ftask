@@ -79,10 +79,10 @@
             var u = BoardView.members.models[i];
             var img = $.gravatar(u.get("email"), {'size': 30});
             var link = $('<li data-user="'+u.get('username')+'"><a href="#" class="miniuser"><img src="'+img.attr('src')+'"/>'+u.get('username')+'</a></li>');
-            $(".allmembers").append(link);
             link.click(function() {
                 Task.assign(model, $(this).data('user'));
             });
+            $(".allmembers").append(link);
         }
     }
 
