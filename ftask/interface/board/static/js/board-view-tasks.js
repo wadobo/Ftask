@@ -6,6 +6,11 @@
     }
 
 
+function hasDateType() {
+    var a = document.createElement("input");
+    a.setAttribute("type", "date");
+    return a.type == "date";
+}
 
 (function() {
     var Task = this.BoardView.Task = {};
@@ -27,8 +32,42 @@
             $(this).parent().remove();
         });
 
-        p.find("textarea").focus();
-        p.find("textarea").keypress(function(event) {
+	ta = p.find("textarea");
+	dd = p.find("[name=due_date]");
+
+	if(hasDateType() == false)
+	{
+	    dd.focus(function() {
+		isoDate = dd.val();
+
+		if(isoDate != '')
+		{
+		    try {
+			a = new Date(dd.val() + "T00:00:00.000");
+			dd.val(a.toLocaleDateString());
+		    } catch(err) {
+			dd.val("<Invalid date>");
+		    }
+		}
+	    });
+
+	    dd.blur(function() {
+		localDate = dd.val();
+
+		if(localDate != '')
+		{
+		    try {
+			a = Date.fromLocaleDateString(localDate).toISODateString();
+			dd.val(a);
+		    } catch(err) {
+			dd.val("<Invalid date>");
+		    }
+		}
+	    });
+	}
+
+        ta.focus();
+        ta.keypress(function(event) {
             if ( event.which == 13 ) {
                 event.preventDefault();
                 $("#task-"+obj.id).submit();
@@ -42,7 +81,13 @@
                    function(data) {
                         $("#task-"+obj.id).remove();
                         BoardView.sync();
-                   });
+                   },
+		   function(data) {
+		       return $.param({
+			   description: ta.val(),
+			   due_date: dd.val() + "T00:00:00.000",
+		       });
+		   });
     }
 
     Task.views = new Array();

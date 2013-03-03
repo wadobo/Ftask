@@ -100,15 +100,16 @@ view_list_dates.path = "/<boardid>/lists/<listid>/tasks/dates"
 def new_list_task(boardid, listid):
     c = get_db().tasks
     description = request.form['description']
-    (m, d, y) = request.form['due_date'].split('/')
+
     order = c.find({'boardid': boardid, 'listid': listid}).count()
 
     t = {
-        'boardid': boardid,
-        'listid': listid,
+        'boardid':     boardid,
+        'listid':      listid,
         'description': description,
-        'due_date' : datetime(int(y), int(m), int(d)),
-        'order': order,
+        'due_date' :   datetime.strptime(request.form['due_date'],
+                                         "%Y-%m-%dT%H:%M:%S.%f"),
+        'order':       order,
     }
 
     c.insert(t)
