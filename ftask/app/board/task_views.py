@@ -50,7 +50,7 @@ def assigned_tasks(userid):
 
     meta = {'total' : t.count()}
 
-    objs = [to_json(i) for i in t]
+    objs = [serialize_task(i) for i in t]
 
     return jsonify(meta=meta, objects=objs)
 assigned_tasks.path = '/assigned/<userid>'
@@ -237,7 +237,11 @@ def serialize_task(t):
     t['assign'] = [to_json(u, excludes=['password']) for u in get_db().users.find({"username": {"$in": s}})]
 
     c = t.get('comments', [])
-    t['comments'] = [{'user': e[0], 'comment' : e[1]} for e in [[to_json(get_db().users.find({'username': i['user']}).next(), excludes=['password']), i['content']] for i in c]]
+    
+    try:
+        t['comments'] = [{'user': e[0], 'comment' : e[1]} for e in [[to_json(get_db().users.find({'username': i['user']}).next(), excludes=['password']), i['content']] for i in c]]
+    except:
+        t['comments'] = []
     
     serialized = to_json(t)
 
