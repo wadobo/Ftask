@@ -40,7 +40,7 @@
         }
 
 	function default_serialize(data) {
-	    return data.serialize;
+	    return data.serialize();
 	}
 
         $(id).unbind('submit').submit(function() {
