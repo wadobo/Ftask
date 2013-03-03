@@ -211,3 +211,6 @@
     overflow-y: hidden;
 }
 
+#task-dropdown .allmembers {
+    margin-top: -1px !important;
+}
