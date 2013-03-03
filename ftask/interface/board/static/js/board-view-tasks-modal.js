@@ -44,6 +44,9 @@
         $('#task-modal').find(".listname").html(l.get("name"));
 	$("#task-modal").find("#comments_board").html(renderComments(model));
 
+	$("#ta_preview").hide();
+	$("[name=comment]").show();
+
         var nf = $('#task-modal').find(".name-form");
         var header = $('#task-modal').find(".header");
         var ta = nf.find("textarea");
@@ -52,6 +55,42 @@
 	dd.val(model.due_date.toISODateString());
 
         nf.hide();
+
+	$("[name=comment]").keydown(function (e) {
+	    
+
+	    if(e.ctrlKey && e.keyCode == 13)
+	    {
+		cf = $('#task-modal').find('.comment-form');
+
+		cf.data('url', Ftask.baseApiBoard + '/' + BoardView.boardId + '/lists/' + l.id + '/tasks/' + model.id + '/comment/');
+
+		Ftask.form("#task-modal .comment-form",
+			   function(data) {
+                               alert("ERROR");
+			   },
+			   function(data) {
+			   });
+
+		cf.submit();
+		return false;
+	    }
+
+	    if(e.ctrlKey && e.keyCode == 80)
+	    {
+		ta = $("[name=comment]");
+		ta_preview = $("#ta_preview");
+		ta_preview.find("#tap_content").html(marked.parse(ta.val()));
+		ta.hide();
+		ta_preview.show();
+
+		ta_preview.click(function () {
+		    ta_preview.hide();
+		    ta.show();
+		});
+		return false;
+	    }
+	});
 
         $('#task-modal').find(".taskname").unbind('click').click(function() {
             nf.show();

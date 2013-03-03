@@ -27,6 +27,7 @@ from .board_views import can_view_board, can_view_assigned
 
 from bson.objectid import ObjectId
 from datetime import datetime
+from markdown import markdown
 
 @authenticated
 @can_view_board
@@ -136,6 +137,27 @@ def view_list_task(boardid, listid, taskid):
 view_list_task.path = '/<boardid>/lists/<listid>/tasks/<taskid>/'
 view_list_task.methods = ['GET', 'PUT', 'DELETE']
 
+
+@authenticated
+@can_view_board
+def comment_task(boardid, listid, taskid):
+    c = get_db().tasks
+    t = c.find_one({'boardid': boardid,
+                    'listid': listid,
+                    '_id': ObjectId(taskid)})
+
+    md = markdown(request.form['comment'], safe_mode='escape')
+    if not t:
+        raise abort(404)
+
+    t['comments'] = t.get('comments', []) + [{'content' : md,
+                                              'user' : g.user['username']}]
+    
+    c.save(t)
+
+    return jsonify(status="success")
+comment_task.path = '/<boardid>/lists/<listid>/tasks/<taskid>/comment/'
+comment_task.methods = ['PUT']
 
 @authenticated
 @can_view_board

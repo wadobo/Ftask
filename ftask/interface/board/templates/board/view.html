@@ -102,8 +102,12 @@
                     <input class="btn btn-info" type="submit" value="Save"/>
                     <a href="#" class="close">&times;</a>
                 </form>
-		<form method="PUT" class="form" data-url="">
-		    <textarea style="width: 95%; height: 100%;" name="comment" placeholder="Type your comment here.."></textarea>
+		<form method="PUT" class="comment-form" data-url="">
+		    <textarea style="width: 95%; height: 100%;" name="comment" placeholder="Type your comment here... <Ctrl>+<Enter> to send, <Ctrl>+<P> to preview"></textarea>
+		    <div id="ta_preview" data-title="Click to hide">
+		      <div class="alert alert-info">Click to hide the preview</div>
+		      <div id="tap_content"></div>
+		    </div>
                 </form>
             </div>
             <div class="span3 menu">
@@ -266,12 +270,13 @@
     </script>
 
     <script type="text/template" id="comment-template">
-	<div class="comment-cls">
-	  <span class="span3"><img src="<%= gravatar_src %>'"/></span>
-	  <span class="com-cont span9">
-	      <span class="com_username text-info"><%= username %></span>
+	<div class="media"><!-- comment-cls -->
+	  <span class="pull-left"><img class="media-object" src="<%= gravatar_src %>'"/></span>
+	  <div class="media-body"><!-- com-cont -->
+	      <span class="com_username text-info media-heading"><%= username %></span>
 	      <span class="com_content"><%= comment %></span>
-	  </span>
+
+	  </div>
 	</div>
     </script>
 
