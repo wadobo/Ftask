@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Task filtering{% endblock %}
+
+{% block containerclass %}container-fluid short-padding{% endblock %}
+
+{% block prehead %}
+{% include "navbar.html" %}
+{% endblock %}
+
+{% block prefooter %}{% endblock %}
+
+{% block content %}
+{{ csrf_token()|safe }}
+
+<div class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="#">Filter by</a>
+    <ul class="nav">
+      <li id="dateNav"><a href="#date">Due date</a></li>
+    </ul>
+    <ul class="nav pull-right">
+      <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+      Options
+      <b class="caret"></b>
+      </a>
+      <ul class="dropdown-menu">
+      <li><a id="expandToAll">Expand to all the board</a></li>
+      <li class="divider"></li>
+      <li><a href="/board/{{ boardid }}">Return to board view</a></li>
+      </ul></li>
+    </ul>
+  </div>
+</div>
+
+<div id="filter-options">
+  
+</div>
+
+<div class="board">
+  <div id="list-list"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script type="text/template" id="task-template">
+        <div class="pull-right">
+            <a href="#" class="dropdown-toggle"><i class=" icon-chevron-down"></i></a>
+        </div>
+        <span class="description"><%- description %></span>
+	<span class="due_date"><%- due_date %></span>
+	<span class="date_status"></span>
+        <div class="clear"></div>
+        <ul class="pull-right inline onetaskmembers"> </ul>
+        <div class="clear"></div>
+    </script>
+
+<script type="text/template" id="miniuser-template">
+        <li class="btn-group memberimg">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                <img src="<%=url%>" alt="<%-user%>" title="<%-user%>" />
+            </a>
+            <ul class="dropdown-menu">
+                <li> <img src="<%=url%>"> <%-user%> </li>
+                <li class="remove">
+                    <a href="#" class="remove-user">Remove from board <i class="icon-remove"></i></a>
+                </li>
+            </ul>
+        </li>
+</script>
+
+<script type="text/template" id="list-template">
+	<div class="header">
+	  <span class="name"><%- name %></span>
+	</div>
+	<div class="cardoverflow">
+            <div class="cards"></div>
+        </div>
+</script>
+
+<script type="text/template" id="date-filter-options">
+	<input name="_min_date_js" id="min_date_js" type="hidden" value="<%- min_date %>"/>
+	<input name="_max_date_js" id="max_date_js" type="hidden" value="<%- max_date %>"/>
+	<div class="row-fluid date-shortcuts">
+	  <div class="span6">
+	    <a id="overdueTasks" class="btn btn-danger">Overdue tasks</a>
+	    <a id="todayTasks" class="btn btn-warning">To be closed today</a>
+	    <a id="thisWeekTasks" class="btn btn-success">To be closed this week</a>
+	    <a id="allTasks" class="btn btn-info">All tasks in list</a>
+	    <div class="date-limits">
+	      Show tasks between
+	      <input id="min_date" type="date" class="dinp well well-small" value="<%- min_date %>"/>
+	      and
+	      <input id="max_date" type="date" class="dinp well well-small" value="<%- max_date %>"/>
+	    </div>
+	  </div>
+	  <div class="span6">
+	      <h5 style="margin-top: -15px;">Deadlines quick report</h5>
+              <div class="progress"></div>
+	      <div id="delayedQty" class="text-error"></div>
+	      <div id="todayQty" class="text-warning"></div>
+	      <div id="weekQty" class="text-success"></div>
+	      <div id="othersQty" class="muted" style="margin-bottom: 10px;"></div>
+	  </div>
+	  </div>
+</script>
+
+<script type="text/javascript" src="{{ url_for('.static', filename='js/board-view.js') }}"></script>
+
+	
+<script type="text/javascript">
+	BoardView.boardId = "{{ boardid }}";
+
+</script> 
+<script type="text/javascript" src="{{ url_for('.static', filename='js/board-view-tasks.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('.static', filename='js/board-view-tasks-modal.js') }}"></script>
+
+<script type="text/javascript" src="{{ url_for('.static', filename='js/board-view-lists.js') }}"></script> 
+<script type="text/javascript" src="{{ url_for('.static', filename='js/board-filtered-view.js') }}"></script>
+	
+<script type="text/javascript">
+	BoardFilteredView.listId = "{{ listid }}";
+	BoardFilteredView.sync();
+</script>
+{% endblock %}
+

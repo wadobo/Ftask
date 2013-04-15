@@ -17,17 +17,80 @@
         Modal.taskModalRemoveAction(model);
     }
 
+    renderComments = function(model) {
+	var html_so_far = "";
+	var template = _.template($('#comment-template').html());
+
+	model.attributes.comments.forEach(function (comment) {
+	    u = comment['user'];
+
+	    var data = {
+		gravatar_src: $.gravatar(u["email"], {'size': 100}).attr("src"),
+		username: u['username'],
+		comment: comment['comment'],
+	    };
+
+	    html_so_far += template(data);
+	});
+
+	return html_so_far;
+    }
+
     taskModalDescription = function(model) {
         var l = _.find(BoardView.List.collection.models, function(v) { return v.id === model.get("listid") });
         // setting task attributes
         $('#task-modal').find(".taskname").html(model.get("description"));
+	$('#task-modal').find(".taskduedate").html(model.due_date.toLocaleDateString());
         $('#task-modal').find(".listname").html(l.get("name"));
+	$("#task-modal").find("#comments_board").html(renderComments(model));
+
+	$("#ta_preview").hide();
+	$("[name=comment]").show();
 
         var nf = $('#task-modal').find(".name-form");
         var header = $('#task-modal').find(".header");
         var ta = nf.find("textarea");
         ta.val(model.get("description"));
+	var dd = nf.find("[name=due_date]");
+	dd.val(model.due_date.toISODateString());
+
         nf.hide();
+
+	$("[name=comment]").keydown(function (e) {
+	    
+
+	    if(e.ctrlKey && e.keyCode == 13)
+	    {
+		cf = $('#task-modal').find('.comment-form');
+
+		cf.data('url', Ftask.baseApiBoard + '/' + BoardView.boardId + '/lists/' + l.id + '/tasks/' + model.id + '/comment/');
+
+		Ftask.form("#task-modal .comment-form",
+			   function(data) {
+                               alert("ERROR");
+			   },
+			   function(data) {
+			   });
+
+		cf.submit();
+		return false;
+	    }
+
+	    if(e.ctrlKey && e.keyCode == 80)
+	    {
+		ta = $("[name=comment]");
+		ta_preview = $("#ta_preview");
+		ta_preview.find("#tap_content").html(marked.parse(ta.val()));
+		ta.hide();
+		ta_preview.show();
+
+		ta_preview.click(function () {
+		    ta_preview.hide();
+		    ta.show();
+		});
+		return false;
+	    }
+	});
 
         $('#task-modal').find(".taskname").unbind('click').click(function() {
             nf.show();
@@ -39,11 +102,18 @@
                             alert("ERROR");
                        },
                        function(data) {
-                            BoardView.sync();
-                            $('#task-modal').find(".taskname").html(ta.val());
-                            nf.hide();
-                            header.show();
-                       });
+                           BoardView.sync();
+                           $('#task-modal').find(".taskname").html(ta.val());
+			   $('#task-modal').find(".taskduedate").html(Date.new(dd.val() + "T00:00:00.000").toLocaleDateString());
+                           nf.hide();
+                           header.show();
+                       },
+		       function(data) {
+			   return $.param({
+			       description: ta.val(),
+			       due_date: dd.val() + "T00:00:00.000",
+			   });
+		       });
         });
 
         $('#task-modal').find(".close").unbind('click').click(function() {

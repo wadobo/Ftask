@@ -1,3 +1,17 @@
+    function updateTaskOrder(lid) {
+        var obj = $("#"+ lid + " .task");
+        var sortedTasks = obj.sort(function(a, b) { return $(a).data("order") < $(b).data("order") ? -1 : 1 });
+        var cards = $("#"+ lid + " .cards");
+        cards.append(sortedTasks);
+    }
+
+
+function hasDateType() {
+    var a = document.createElement("input");
+    a.setAttribute("type", "date");
+    return a.type == "date";
+}
+
 (function() {
     var Task = this.BoardView.Task = {};
 
@@ -18,8 +32,42 @@
             $(this).parent().remove();
         });
 
-        p.find("textarea").focus();
-        p.find("textarea").keypress(function(event) {
+	ta = p.find("textarea");
+	dd = p.find("[name=due_date]");
+
+	if(hasDateType() == false)
+	{
+	    dd.focus(function() {
+		isoDate = dd.val();
+
+		if(isoDate != '')
+		{
+		    try {
+			a = new Date(dd.val() + "T00:00:00.000");
+			dd.val(a.toLocaleDateString());
+		    } catch(err) {
+			dd.val("<Invalid date>");
+		    }
+		}
+	    });
+
+	    dd.blur(function() {
+		localDate = dd.val();
+
+		if(localDate != '')
+		{
+		    try {
+			a = Date.fromLocaleDateString(localDate).toISODateString();
+			dd.val(a);
+		    } catch(err) {
+			dd.val("<Invalid date>");
+		    }
+		}
+	    });
+	}
+
+        ta.focus();
+        ta.keypress(function(event) {
             if ( event.which == 13 ) {
                 event.preventDefault();
                 $("#task-"+obj.id).submit();
@@ -33,7 +81,13 @@
                    function(data) {
                         $("#task-"+obj.id).remove();
                         BoardView.sync();
-                   });
+                   },
+		   function(data) {
+		       return $.param({
+			   description: ta.val(),
+			   due_date: dd.val() + "T00:00:00.000",
+		       });
+		   });
     }
 
     Task.views = new Array();
@@ -82,8 +136,24 @@
     // Backbone stuff
 
     Task.Task = Backbone.Model.extend({
-        idAttribute: "id"
+        idAttribute: "id",
+	due_date: "due_date",
+
+	initialize: function (attrs) {
+	    this.due_date = Date.new(this.attributes.due_date);
+	},
+
+	toJSON: function (options) {
+	    ret = _.clone(this.attributes);
+
+	    if(options != undefined && options.override_due_date) {
+		ret.due_date = this.due_date.toLocaleDateString();
+	    }
+
+	    return ret;
+	},
     });
+
     Task.Tasks = Backbone.Collection.extend({
         model: Task.Task,
         parse: function(response) {
@@ -113,7 +183,7 @@
         },
 
         render: function() {
-            this.$el.html(this.template(this.model.toJSON()));
+            this.$el.html(this.template(this.model.toJSON({override_due_date: true})));
             var model = this.model;
             this.$el.attr("id", model.id);
             this.$el.data("order", model.get("order"));
@@ -218,12 +288,6 @@
 
     // internal functions
 
-    function updateTaskOrder(lid) {
-        var obj = $("#"+ lid + " .task");
-        var sortedTasks = obj.sort(function(a, b) { return $(a).data("order") < $(b).data("order") ? -1 : 1 });
-        var cards = $("#"+ lid + " .cards");
-        cards.append(sortedTasks);
-    }
 
     // drag & drop
 
@@ -260,17 +324,25 @@
 
         // Change model order attr and update
         var list = $(this).parent().parent().parent();
+
         var tasks = list.find(".task");
         tasks.each(function(i, l) {
             var obj = $(l);
             if (!obj.hasClass("dragging")) {
                 var view = _.find(Task.views, function(v) { return v.model.id === obj.attr("id") });
-                view.model.set({"order": i, "listid": list.attr("id")}, {silent: true});
+
+		/* FIXME: By modifying the list template in the filter view, 
+		   it's very likely that the list-list check won't be required 
+		   any more. Remove in future updates */
+		   
+		list_id = list.attr("id") == "list-list" ? BoardFilteredView.listId : list.attr("id");
+
+                view.model.set({"order": i, "listid": list_id}, {silent: true});
                 view.$el.data("order", i);
 
                 var url = '/api/boards/' + BoardView.boardId + '/lists/'+list.attr("id")+'/tasks/'+view.model.id+'/';
                 var token = $("#csrf_token").val();
-                var data = {'_csrf_token': token, 'order': i, 'listid': list.attr("id")};
+                var data = {'_csrf_token': token, 'order': i, 'listid': list_id};
                 var req = $.ajax({url:url, data:data, type:"PUT"});
                 req.done(function(data) {
                     Ftask.updateCsrf();

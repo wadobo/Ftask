@@ -23,10 +23,11 @@ from flask import g
 from ..db import get_db, to_json
 from ..auth.decorators import authenticated
 from .board_views import get_board_by_id
-from .board_views import can_view_board
+from .board_views import can_view_board, can_view_assigned
 
 from bson.objectid import ObjectId
-
+from datetime import datetime
+from markdown import markdown
 
 @authenticated
 @can_view_board
@@ -41,6 +42,18 @@ def view_board_tasks(boardid):
                    objects=objs)
 view_board_tasks.path = '/<boardid>/tasks/'
 
+@authenticated
+@can_view_assigned
+def assigned_tasks(userid):
+    c = get_db().tasks
+    t = c.find({'assign' : userid})
+
+    meta = {'total' : t.count()}
+
+    objs = [serialize_task(i) for i in t]
+
+    return jsonify(meta=meta, objects=objs)
+assigned_tasks.path = '/assigned/<userid>'
 
 @authenticated
 @can_view_board
@@ -55,19 +68,48 @@ def view_list_tasks(boardid, listid):
                    objects=objs)
 view_list_tasks.path = '/<boardid>/lists/<listid>/tasks/'
 
+@authenticated
+@can_view_board
+def view_list_dates(boardid, listid):
+    if listid == "all":
+        query = {'boardid': boardid}
+    else:
+        query = {'boardid': boardid, 'listid': listid}
+
+    max_date = get_db().tasks.find(query).sort('due_date', -1).limit(1)
+    min_date = get_db().tasks.find(query).sort('due_date', 1).limit(1)
+
+    meta = {}
+    
+    if max_date.count() == 0 or min_date.count() == 0:
+        meta['unlimited'] = 1
+    else:
+        meta['unlimited'] = 0
+
+    
+    objs = {
+        'min_date': None if min_date.count() == 0 else min_date.next()['due_date'].isoformat(),
+        'max_date': None if max_date.count() == 0 else max_date.next()['due_date'].isoformat(),
+        }
+    
+    return jsonify(meta=meta, objects=objs)
+view_list_dates.path = "/<boardid>/lists/<listid>/tasks/dates"
 
 @authenticated
 @can_view_board
 def new_list_task(boardid, listid):
     c = get_db().tasks
     description = request.form['description']
+
     order = c.find({'boardid': boardid, 'listid': listid}).count()
 
     t = {
-        'boardid': boardid,
-        'listid': listid,
+        'boardid':     boardid,
+        'listid':      listid,
         'description': description,
-        'order': order,
+        'due_date' :   datetime.strptime(request.form['due_date'],
+                                         "%Y-%m-%dT%H:%M:%S.%f"),
+        'order':       order,
     }
 
     c.insert(t)
@@ -96,6 +138,27 @@ def view_list_task(boardid, listid, taskid):
 view_list_task.path = '/<boardid>/lists/<listid>/tasks/<taskid>/'
 view_list_task.methods = ['GET', 'PUT', 'DELETE']
 
+
+@authenticated
+@can_view_board
+def comment_task(boardid, listid, taskid):
+    c = get_db().tasks
+    t = c.find_one({'boardid': boardid,
+                    'listid': listid,
+                    '_id': ObjectId(taskid)})
+
+    md = markdown(request.form['comment'], safe_mode='escape')
+    if not t:
+        raise abort(404)
+
+    t['comments'] = t.get('comments', []) + [{'content' : md,
+                                              'user' : g.user['username']}]
+    
+    c.save(t)
+
+    return jsonify(status="success")
+comment_task.path = '/<boardid>/lists/<listid>/tasks/<taskid>/comment/'
+comment_task.methods = ['PUT']
 
 @authenticated
 @can_view_board
@@ -157,6 +220,9 @@ def update_task(task, user, newdata):
     for k, v in newdata.items():
         if k == "order":
             task[k] = int(v)
+        elif k == "due_date":
+            task[k] = datetime.strptime(request.form['due_date'],
+                                        "%Y-%m-%dT%H:%M:%S.%f")
         else:
             task[k] = v
 
@@ -170,6 +236,14 @@ def delete_task(task, user):
 def serialize_task(t):
     s = t.get('assign', [])
     t['assign'] = [to_json(u, excludes=['password']) for u in get_db().users.find({"username": {"$in": s}})]
+
+    c = t.get('comments', [])
+    
+    try:
+        t['comments'] = [{'user': e[0], 'comment' : e[1]} for e in [[to_json(get_db().users.find({'username': i['user']}).next(), excludes=['password']), i['content']] for i in c]]
+    except:
+        t['comments'] = []
+    
     serialized = to_json(t)
 
     return serialized

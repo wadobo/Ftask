@@ -60,24 +60,60 @@
         render: function() {
             this.$el.html(this.template(this.model.toJSON()));
             var model = this.model;
-            this.$el.find(".name").dblclick(function() {
-                List.editNameForm($(this), model);
+
+	    this.$el.find(".name").each(function() {
+                $(this).popover({title : 'Options', 
+				 placement : 'bottom',
+				 html : true,
+				 trigger : 'manual',
+				 content : $("#popover-template").html()});
+	    });
+
+	    this.$el.find(".name").click(function() {                
+                var popover = $(this).data('popover');
+		if(popover['$tip'] == undefined || popover['$tip'].hasClass('in') == false)
+		{
+			$(this).popover('show');
+			$("#editlistname").click(function() {
+				List.editNameForm($(this).parent().parent(),
+						  model);
+			});
+			$("#filtertasks").click(function() {
+				window.location.href = "/board/" + BoardView.boardId + "/" + model.id + "/filter#date";
+			});
+		} else {
+			$(this).popover('hide');
+		}
             });
+
             this.$el.find(".newcard").click(function() {
                 BoardView.Task.newCardForm($(this).parent().find(".newcardform"), model);
             });
             this.$el.find(".close").click(function() {
-                var token = $("#csrf_token").val();
-                var url = Ftask.baseApiBoard + '/' + BoardView.boardId + '/lists/' + model.id + '/';
-                var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
-                req.done(function(data) {
-                    List.collection.fetch({update: true});
-                    Ftask.updateCsrf();
-                });
-                req.fail(function(data) {
-                    alert("ERROR");
-                    Ftask.updateCsrf();
-                });
+	        $("#dialog-confirm").dialog({
+			resizable: false,
+			height : 140,
+			modal: true,
+			buttons : {
+				"Delete the list": function() {
+				      var token = $("#csrf_token").val();
+				      var url = Ftask.baseApiBoard + '/' + BoardView.boardId + '/lists/' + model.id + '/';
+				      var req = $.ajax({url:url + '?_csrf_token='+token, type:"DELETE"});
+				      req.done(function(data) {
+				            List.collection.fetch({update: true});
+					    Ftask.updateCsrf();
+                		      });
+				      req.fail(function(data) {
+				            alert("ERROR");
+					    Ftask.updateCsrf();
+			              });
+				      $(this).dialog("close");
+                                },
+				"Cancel": function() {
+				      $(this).dialog("close");
+                                }},
+			});
+
                 return false;
             });
 

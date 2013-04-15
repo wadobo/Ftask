@@ -15,7 +15,7 @@
 
 {{ csrf_token()|safe }}
 <div class="row">
-    <div class="span8">
+    <div id="main_content" class="span8">
         {% block main_content %}
         {% endblock %}
     </div>
@@ -24,8 +24,9 @@
             <div id="gravatar"> </div>
             <ul class="nav nav-list">
                 <li class="nav-header">@{{ g.user['username'] }}</li>
-                <li {% if selected == "profile" %}class="active"{% endif %}><a href="{{ url_for('authi.profile') }}">Profile</a></li>
+                <li id="profile" {% if selected == "profile" %}class="active"{% endif %}><a href="{{ url_for('authi.profile') }}">Profile</a></li>
                 <li {% if selected == "board" %}class="active"{% endif %}><a href="{{ url_for('boardi.list_board') }}">Boards</a></li>
+		<li id="assigned_tasks"><a href="#assigned">Assigned tasks</a></li>
             </ul>
         </div>
 
@@ -36,7 +37,23 @@
 
 {% block scripts %}
     {{ super() }}
+
+<script type="text/template" id="task-template">
+<tr class="<%- css_status %>">
+  <td><%- description %></td>
+  <td><%- due_date %></td>
+  <td><%- status %></td>
+</tr>
+</script>
+
     <script type="text/javascript">
         $('#gravatar').html($.gravatar("{{ g.user['email'] }}", {'size': 170}));
     </script>
+
+<script type="text/javascript">
+var api_url = "{{ url_for("board.assigned_tasks", userid=g.user['username']) }}";
+</script>
+<script type="text/javascript" src="{{ url_for('authi.static', filename='js/auth-assigned-view.js') }}"></script>
+
+
 {% endblock %}

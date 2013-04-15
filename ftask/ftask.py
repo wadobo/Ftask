@@ -27,6 +27,8 @@ from app.board.views import board
 from interface.auth.views import authi
 from interface.board.views import boardi
 
+from werkzeug.serving import run_simple
+from sys import argv
 
 # configuration
 DEBUG = True
@@ -63,4 +65,32 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run()
+    if argv[1] == "--i-want-to-put-my-host-on-danger" and argv[2] == "--allow-clients-to-execute-python-on-the-machine":
+
+        err_msg = "number of parameters"
+        
+        try:
+            a = argv[4]
+
+            err_msg = "IP"
+            
+            a = [1 for x in argv[3].split('.') if int(x) <= 255 and int(x) >= 0]
+            if sum(a) < 4 or (not len(argv[3].split('.')) == 4):
+                raise Exception
+
+            err_msg = "PORT"
+            
+            if not (int(argv[4]) > 0 and int(argv[4]) < 65536):
+                raise Exception
+            
+        except:
+            print "Invalid %s\n" % err_msg
+            print "usage " + argv[0] + " --i-want-to-put-my-host-on-danger --allow-clients-to-execute-python-on-the-machine [EXTERNAL IP or 0.0.0.0] [PORT]"
+
+            exit(-1)
+            
+        run_simple(argv[3], int(argv[4]), app, use_reloader=True)
+
+    else:
+        app.run()
+

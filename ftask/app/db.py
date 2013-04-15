@@ -29,6 +29,11 @@ def to_json(mongo_obj, excludes=[]):
     copy = mongo_obj.copy()
     id = copy.pop('_id')
     copy['id'] = id.binary.encode("hex")
+    try:
+        due_date = copy.pop('due_date')
+        copy['due_date'] = due_date.isoformat()
+    except KeyError:
+        pass
     for k in excludes:
         del copy[k]
     return copy
